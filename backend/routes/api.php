@@ -19,8 +19,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'getCurrentUser']);
 
-    // Users
-    Route::apiResource('users', UserController::class);
+    // User Profile (accessible to all authenticated users)
+    Route::get('/profile', [UserController::class, 'profile']);
+    Route::put('/profile', [UserController::class, 'updateProfile']);
+
+    // User Management (admin only)
+    Route::middleware('role:super_admin,company_admin')->group(function () {
+        Route::apiResource('users', UserController::class);
+        Route::post('users/{user}/assign-role', [UserController::class, 'assignRole']);
+        Route::get('users/{user}/permissions', [UserController::class, 'permissions']);
+        Route::post('users/{user}/check-permission', [UserController::class, 'checkPermission']);
+    });
 
     // Bookings
     Route::apiResource('bookings', BookingController::class);
@@ -31,8 +40,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('payments', PaymentController::class);
     Route::post('payments/{payment}/process', [PaymentController::class, 'process']);
 
-    // Suppliers
-    Route::apiResource('suppliers', SupplierController::class);
+    // Suppliers (admin and agents can view, only admin can modify)
+    Route::middleware('role:super_admin,company_admin')->group(function () {
+        Route::post('suppliers', [SupplierController::class, 'store']);
+        Route::put('suppliers/{supplier}', [SupplierController::class, 'update']);
+        Route::delete('suppliers/{supplier}', [SupplierController::class, 'destroy']);
+    });
+    Route::get('suppliers', [SupplierController::class, 'index']);
+    Route::get('suppliers/{supplier}', [SupplierController::class, 'show']);
 
     // Documents
     Route::apiResource('documents', DocumentController::class);
