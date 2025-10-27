@@ -1,0 +1,37 @@
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  first_name?: string;
+  last_name?: string;
+  phone?: string;
+  role: 'super_admin' | 'company_admin' | 'agent' | 'customer';
+  status: 'active' | 'inactive' | 'suspended';
+  last_login_at?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface RegisterRequest {
+  name: string;
+  email: string;
+  password: string;
+  password_confirmation: string;
+  first_name?: string;
+  last_name?: string;
+  phone?: string;
+}
+
+export interface AuthResponse {
+  user: User;
+  token: string;
+}
+
+export interface LogoutResponse {
+  message: string;
+}
