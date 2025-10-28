@@ -17,7 +17,6 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'company_id',
         'first_name',
         'last_name',
         'phone',
@@ -63,34 +62,20 @@ class User extends Authenticatable
         return url('storage/' . $this->avatar);
     }
 
-    public function company()
-    {
-        return $this->belongsTo(Company::class);
-    }
-
-    public function customer()
-    {
-        return $this->hasOne(Customer::class);
-    }
-
+    /**
+     * Get all bookings created by this user.
+     */
     public function bookings()
     {
-        return $this->hasMany(Booking::class, 'agent_id');
+        return $this->hasMany(Booking::class, 'user_id');
     }
 
-    public function documents()
+    /**
+     * Get all refunds processed by this user (admin only).
+     */
+    public function processedRefunds()
     {
-        return $this->hasMany(Document::class, 'uploaded_by');
-    }
-
-    public function communications()
-    {
-        return $this->hasMany(Communication::class, 'created_by');
-    }
-
-    public function activityLogs()
-    {
-        return $this->hasMany(ActivityLog::class);
+        return $this->hasMany(Refund::class, 'processed_by');
     }
 
     // Role-Based Access Control Methods
@@ -112,15 +97,15 @@ class User extends Authenticatable
      */
     public function isSuperAdmin(): bool
     {
-        return $this->role === 'super_admin';
+        return $this->role === 'superadmin';
     }
 
     /**
-     * Check if user is a company admin.
+     * Check if user is an admin.
      */
-    public function isCompanyAdmin(): bool
+    public function isAdmin(): bool
     {
-        return $this->role === 'company_admin';
+        return $this->role === 'admin';
     }
 
     /**
@@ -144,7 +129,7 @@ class User extends Authenticatable
      */
     public function assignRole(string $role): bool
     {
-        $validRoles = ['super_admin', 'company_admin', 'agent', 'customer'];
+        $validRoles = ['superadmin', 'admin', 'agent', 'customer'];
 
         if (!in_array($role, $validRoles)) {
             return false;
@@ -161,27 +146,25 @@ class User extends Authenticatable
     public function hasPermission(string $permission): bool
     {
         $permissions = [
-            'super_admin' => [
-                'manage_companies',
-                'manage_all_users',
+            'superadmin' => [
+                'manage_users',
+                'manage_vessels',
+                'manage_routes',
                 'manage_all_bookings',
-                'manage_suppliers',
-                'manage_products',
+                'view_all_customers',
                 'view_all_reports',
                 'manage_system_settings',
-                'view_activity_logs',
                 'manage_all_payments',
-                'manage_all_invoices',
-                'manage_all_documents',
+                'manage_all_refunds',
             ],
-            'company_admin' => [
-                'manage_company_users',
-                'manage_company_bookings',
-                'manage_company_customers',
-                'view_company_reports',
-                'manage_company_payments',
-                'manage_company_invoices',
-                'manage_company_documents',
+            'admin' => [
+                'view_all_bookings',
+                'confirm_bookings',
+                'cancel_bookings',
+                'view_all_customers',
+                'view_payments',
+                'manage_refunds',
+                'view_reports',
             ],
             'agent' => [
                 'create_bookings',
@@ -192,14 +175,15 @@ class User extends Authenticatable
                 'view_own_payments',
                 'generate_invoices',
                 'upload_documents',
-                'view_suppliers',
-                'view_products',
+                'view_vessels',
+                'view_routes',
             ],
             'customer' => [
+                'create_bookings',
                 'view_own_bookings',
+                'cancel_own_bookings',
                 'view_own_payments',
-                'view_own_invoices',
-                'view_own_documents',
+                'request_refunds',
                 'update_own_profile',
             ],
         ];
@@ -223,14 +207,14 @@ class User extends Authenticatable
         }
 
         $permissions = [
-            'company_admin' => [
-                'manage_company_users',
-                'manage_company_bookings',
-                'manage_company_customers',
-                'view_company_reports',
-                'manage_company_payments',
-                'manage_company_invoices',
-                'manage_company_documents',
+            'admin' => [
+                'view_all_bookings',
+                'confirm_bookings',
+                'cancel_bookings',
+                'view_all_customers',
+                'view_payments',
+                'manage_refunds',
+                'view_reports',
             ],
             'agent' => [
                 'create_bookings',
@@ -241,14 +225,15 @@ class User extends Authenticatable
                 'view_own_payments',
                 'generate_invoices',
                 'upload_documents',
-                'view_suppliers',
-                'view_products',
+                'view_vessels',
+                'view_routes',
             ],
             'customer' => [
+                'create_bookings',
                 'view_own_bookings',
+                'cancel_own_bookings',
                 'view_own_payments',
-                'view_own_invoices',
-                'view_own_documents',
+                'request_refunds',
                 'update_own_profile',
             ],
         ];

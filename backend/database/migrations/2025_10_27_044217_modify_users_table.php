@@ -12,17 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->uuid('company_id')->nullable()->after('id');
             $table->string('first_name')->nullable()->after('name');
             $table->string('last_name')->nullable()->after('first_name');
             $table->string('phone')->nullable()->after('email');
-            $table->enum('role', ['super_admin', 'company_admin', 'agent', 'customer'])->default('customer')->after('phone');
+            $table->enum('role', ['superadmin', 'admin', 'agent', 'customer'])->default('customer')->after('phone');
             $table->enum('status', ['active', 'inactive', 'suspended'])->default('active')->after('role');
-            $table->timestamp('last_login_at')->nullable()->after('status');
+            $table->string('avatar')->nullable()->after('status');
+            $table->timestamp('last_login_at')->nullable()->after('avatar');
             $table->json('preferences')->nullable()->after('last_login_at');
             $table->softDeletes();
-
-            $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
         });
     }
 
@@ -32,14 +30,13 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropForeign(['company_id']);
             $table->dropColumn([
-                'company_id',
                 'first_name',
                 'last_name',
                 'phone',
                 'role',
                 'status',
+                'avatar',
                 'last_login_at',
                 'preferences',
                 'deleted_at'
