@@ -121,11 +121,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const isSuperAdmin = (): boolean => {
-    return user?.role === 'super_admin';
+    return user?.role === 'superadmin';
   };
 
   const isCompanyAdmin = (): boolean => {
-    return user?.role === 'company_admin';
+    return user?.role === 'admin';
   };
 
   const isAgent = (): boolean => {
@@ -141,8 +141,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Define permissions for each role (matches backend)
     const permissions: Record<string, string[]> = {
-      super_admin: ['*'], // Super admin has all permissions
-      company_admin: [
+      superadmin: ['*'], // Super admin has all permissions
+      admin: [
         'manage_company_users',
         'manage_company_bookings',
         'manage_company_customers',
@@ -173,7 +173,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     // Super admin has all permissions
-    if (user.role === 'super_admin') {
+    if (user.role === 'superadmin') {
       return true;
     }
 

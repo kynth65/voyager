@@ -15,6 +15,12 @@ import VesselsPage from './pages/admin/VesselsPage';
 import VesselFormPage from './pages/admin/VesselFormPage';
 import RoutesPage from './pages/admin/RoutesPage';
 import RouteFormPage from './pages/admin/RouteFormPage';
+import AdminBookingsPage from './pages/admin/AdminBookingsPage';
+// Customer pages
+import LandingPage from './pages/LandingPage';
+import BrowseRoutesPage from './pages/customer/BrowseRoutesPage';
+import BookingPage from './pages/customer/BookingPage';
+import MyBookingsPage from './pages/customer/MyBookingsPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -104,7 +110,17 @@ function RoleBasedRoute({
 function AppRoutes() {
   return (
     <Routes>
-      {/* Public routes */}
+      {/* Public routes - Landing page redirects to dashboard if authenticated */}
+      <Route
+        path="/"
+        element={
+          <PublicRoute>
+            <LandingPage />
+          </PublicRoute>
+        }
+      />
+
+      {/* Auth routes */}
       <Route
         path="/login"
         element={
@@ -138,6 +154,32 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <ProfilePage />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Customer routes */}
+      <Route
+        path="/browse-routes"
+        element={
+          <ProtectedRoute>
+            <BrowseRoutesPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/booking/:routeId"
+        element={
+          <ProtectedRoute>
+            <BookingPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/my-bookings"
+        element={
+          <ProtectedRoute>
+            <MyBookingsPage />
           </ProtectedRoute>
         }
       />
@@ -220,9 +262,18 @@ function AppRoutes() {
         }
       />
 
-      {/* Default redirect */}
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      {/* Admin Bookings (superadmin and admin) */}
+      <Route
+        path="/admin/bookings"
+        element={
+          <RoleBasedRoute allowedRoles={['superadmin', 'admin']}>
+            <AdminBookingsPage />
+          </RoleBasedRoute>
+        }
+      />
+
+      {/* Catch all - redirect to home */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
