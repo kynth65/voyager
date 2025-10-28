@@ -8,6 +8,8 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\VesselController;
+use App\Http\Controllers\RouteController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\DocumentController;
 
@@ -32,14 +34,29 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/profile/avatar', [ProfileController::class, 'uploadAvatar']);
     Route::delete('/profile/avatar', [ProfileController::class, 'deleteAvatar']);
 
-    // User Management (admin only)
-    Route::middleware('role:super_admin,company_admin')->group(function () {
+    // User Management (superadmin only)
+    Route::middleware('role:superadmin')->group(function () {
         Route::apiResource('users', UserController::class);
         Route::post('users/{id}/restore', [UserController::class, 'restore']);
         Route::delete('users/{id}/force', [UserController::class, 'forceDelete']);
         Route::post('users/{user}/assign-role', [UserController::class, 'assignRole']);
         Route::get('users/{user}/permissions', [UserController::class, 'permissions']);
         Route::post('users/{user}/check-permission', [UserController::class, 'checkPermission']);
+    });
+
+    // Vessel Management (superadmin only)
+    Route::middleware('role:superadmin')->group(function () {
+        Route::apiResource('vessels', VesselController::class);
+        Route::post('vessels/{id}/restore', [VesselController::class, 'restore']);
+        Route::post('vessels/{id}/image', [VesselController::class, 'uploadImage']);
+        Route::delete('vessels/{id}/image', [VesselController::class, 'deleteImage']);
+        Route::get('vessels/{id}/availability', [VesselController::class, 'checkAvailability']);
+    });
+
+    // Route Management (superadmin only)
+    Route::middleware('role:superadmin')->group(function () {
+        Route::apiResource('routes', RouteController::class);
+        Route::post('routes/{id}/restore', [RouteController::class, 'restore']);
     });
 
     // Bookings
@@ -51,8 +68,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('payments', PaymentController::class);
     Route::post('payments/{payment}/process', [PaymentController::class, 'process']);
 
-    // Suppliers (admin and agents can view, only admin can modify)
-    Route::middleware('role:super_admin,company_admin')->group(function () {
+    // Suppliers (superadmin and admin can manage)
+    Route::middleware('role:superadmin,admin')->group(function () {
         Route::post('suppliers', [SupplierController::class, 'store']);
         Route::put('suppliers/{supplier}', [SupplierController::class, 'update']);
         Route::delete('suppliers/{supplier}', [SupplierController::class, 'destroy']);
