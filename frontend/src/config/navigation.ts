@@ -9,6 +9,8 @@ import {
   BarChart3,
   Settings,
   UserCircle,
+  Home,
+  BookOpen,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -62,15 +64,27 @@ export const navigationConfig: NavGroup[] = [
     ],
   },
   {
-    label: 'Bookings',
-    roles: ['superadmin', 'admin', 'customer'],
+    label: 'Booking',
+    roles: ['customer'],
     items: [
       {
-        label: 'My Bookings',
-        icon: Calendar,
-        href: '/bookings',
+        label: 'Browse Routes',
+        icon: Home,
+        href: '/browse-routes',
         roles: ['customer'],
       },
+      {
+        label: 'My Bookings',
+        icon: BookOpen,
+        href: '/my-bookings',
+        roles: ['customer'],
+      },
+    ],
+  },
+  {
+    label: 'Bookings',
+    roles: ['superadmin', 'admin'],
+    items: [
       {
         label: 'All Bookings',
         icon: Calendar,

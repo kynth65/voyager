@@ -1,14 +1,16 @@
 import { useAuth } from '../contexts/AuthContext';
-import { User, Mail, Phone, Shield, Calendar } from 'lucide-react';
+import { User, Mail, Phone, Shield, Calendar, Ship, BookOpen, Users, Route as RouteIcon } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
 
 export default function DashboardPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const getRoleBadgeColor = (role: string) => {
     const colors: Record<string, string> = {
-      super_admin: 'bg-purple-100 text-purple-800 border-purple-200',
-      company_admin: 'bg-blue-100 text-blue-800 border-blue-200',
+      superadmin: 'bg-purple-100 text-purple-800 border-purple-200',
+      admin: 'bg-blue-100 text-blue-800 border-blue-200',
       agent: 'bg-green-100 text-green-800 border-green-200',
       customer: 'bg-gray-100 text-gray-800 border-gray-200',
     };
@@ -185,9 +187,95 @@ export default function DashboardPage() {
             <h3 className="text-lg font-semibold text-gray-900">Quick Actions</h3>
           </div>
           <div className="px-6 py-6">
-            <p className="text-sm text-gray-600">
-              More features coming soon! This dashboard will include booking management, customer profiles, and analytics.
-            </p>
+            {user?.role === 'customer' ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button
+                  onClick={() => navigate('/browse-routes')}
+                  className="flex items-center gap-4 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl hover:shadow-md transition-all group"
+                >
+                  <div className="flex-shrink-0 w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Ship className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="text-left">
+                    <h4 className="text-base font-semibold text-gray-900">Browse Routes</h4>
+                    <p className="text-sm text-gray-600">Find and book ferry tickets</p>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => navigate('/my-bookings')}
+                  className="flex items-center gap-4 p-6 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl hover:shadow-md transition-all group"
+                >
+                  <div className="flex-shrink-0 w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <BookOpen className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="text-left">
+                    <h4 className="text-base font-semibold text-gray-900">My Bookings</h4>
+                    <p className="text-sm text-gray-600">View your booking history</p>
+                  </div>
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {/* Admin Bookings */}
+                <button
+                  onClick={() => navigate('/admin/bookings')}
+                  className="flex items-center gap-4 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl hover:shadow-md transition-all group"
+                >
+                  <div className="flex-shrink-0 w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <BookOpen className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="text-left">
+                    <h4 className="text-base font-semibold text-gray-900">All Bookings</h4>
+                    <p className="text-sm text-gray-600">Manage all bookings</p>
+                  </div>
+                </button>
+
+                {/* Vessels Management (superadmin only) */}
+                {user?.role === 'superadmin' && (
+                  <>
+                    <button
+                      onClick={() => navigate('/admin/vessels')}
+                      className="flex items-center gap-4 p-6 bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-xl hover:shadow-md transition-all group"
+                    >
+                      <div className="flex-shrink-0 w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <Ship className="w-6 h-6 text-white" />
+                      </div>
+                      <div className="text-left">
+                        <h4 className="text-base font-semibold text-gray-900">Vessels</h4>
+                        <p className="text-sm text-gray-600">Manage vessels</p>
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={() => navigate('/admin/routes')}
+                      className="flex items-center gap-4 p-6 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl hover:shadow-md transition-all group"
+                    >
+                      <div className="flex-shrink-0 w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <RouteIcon className="w-6 h-6 text-white" />
+                      </div>
+                      <div className="text-left">
+                        <h4 className="text-base font-semibold text-gray-900">Routes</h4>
+                        <p className="text-sm text-gray-600">Manage routes</p>
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={() => navigate('/users')}
+                      className="flex items-center gap-4 p-6 bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 rounded-xl hover:shadow-md transition-all group"
+                    >
+                      <div className="flex-shrink-0 w-12 h-12 bg-orange-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <Users className="w-6 h-6 text-white" />
+                      </div>
+                      <div className="text-left">
+                        <h4 className="text-base font-semibold text-gray-900">Users</h4>
+                        <p className="text-sm text-gray-600">Manage user accounts</p>
+                      </div>
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
