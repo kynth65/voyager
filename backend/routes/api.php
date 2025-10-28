@@ -22,6 +22,12 @@ Route::post('/password/email', [PasswordResetController::class, 'sendResetLink']
 Route::post('/password/reset', [PasswordResetController::class, 'resetPassword']);
 Route::post('/password/validate-token', [PasswordResetController::class, 'validateResetToken']);
 
+// Public access to routes and vessels (for browsing before login)
+Route::get('/routes', [RouteController::class, 'index']);
+Route::get('/routes/{route}', [RouteController::class, 'show']);
+Route::get('/vessels', [VesselController::class, 'index']);
+Route::get('/vessels/{vessel}', [VesselController::class, 'show']);
+
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
     // Authentication
@@ -44,25 +50,30 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('users/{user}/check-permission', [UserController::class, 'checkPermission']);
     });
 
-    // Vessel Management (superadmin only)
+    // Vessel Management (superadmin only - write operations)
     Route::middleware('role:superadmin')->group(function () {
-        Route::apiResource('vessels', VesselController::class);
+        Route::post('vessels', [VesselController::class, 'store']);
+        Route::put('vessels/{vessel}', [VesselController::class, 'update']);
+        Route::delete('vessels/{vessel}', [VesselController::class, 'destroy']);
         Route::post('vessels/{id}/restore', [VesselController::class, 'restore']);
         Route::post('vessels/{id}/image', [VesselController::class, 'uploadImage']);
         Route::delete('vessels/{id}/image', [VesselController::class, 'deleteImage']);
         Route::get('vessels/{id}/availability', [VesselController::class, 'checkAvailability']);
     });
 
-    // Route Management (superadmin only)
+    // Route Management (superadmin only - write operations)
     Route::middleware('role:superadmin')->group(function () {
-        Route::apiResource('routes', RouteController::class);
+        Route::post('routes', [RouteController::class, 'store']);
+        Route::put('routes/{route}', [RouteController::class, 'update']);
+        Route::delete('routes/{route}', [RouteController::class, 'destroy']);
         Route::post('routes/{id}/restore', [RouteController::class, 'restore']);
     });
 
-    // Bookings
+    // Bookings (customers can create and view their own, admins can see all)
     Route::apiResource('bookings', BookingController::class);
     Route::post('bookings/{booking}/confirm', [BookingController::class, 'confirm']);
     Route::post('bookings/{booking}/cancel', [BookingController::class, 'cancel']);
+    Route::get('vessels/{vessel}/capacity', [BookingController::class, 'getCapacity']);
 
     // Payments
     Route::apiResource('payments', PaymentController::class);

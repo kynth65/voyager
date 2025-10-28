@@ -115,7 +115,7 @@ class RouteController extends Controller
 
         return response()->json([
             'message' => 'Route created successfully',
-            'route' => $route->load('vessel'),
+            'data' => $route->load('vessel'),
         ], 201);
     }
 
@@ -127,7 +127,7 @@ class RouteController extends Controller
         $route = Route::withTrashed()->with(['vessel', 'bookings'])->findOrFail($id);
 
         return response()->json([
-            'route' => $route,
+            'data' => $route,
         ]);
     }
 
@@ -190,7 +190,7 @@ class RouteController extends Controller
 
         return response()->json([
             'message' => 'Route updated successfully',
-            'route' => $route->fresh()->load('vessel'),
+            'data' => $route->fresh()->load('vessel'),
         ]);
     }
 
@@ -244,7 +244,7 @@ class RouteController extends Controller
 
         return response()->json([
             'message' => 'Route restored successfully',
-            'route' => $route->load('vessel'),
+            'data' => $route->load('vessel'),
         ]);
     }
 }
