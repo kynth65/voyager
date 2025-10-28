@@ -25,12 +25,15 @@ class User extends Authenticatable
         'status',
         'last_login_at',
         'preferences',
+        'avatar',
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
     ];
+
+    protected $appends = ['avatar_url'];
 
     protected function casts(): array
     {
@@ -40,6 +43,24 @@ class User extends Authenticatable
             'last_login_at' => 'datetime',
             'preferences' => 'json',
         ];
+    }
+
+    /**
+     * Get the full URL for the user's avatar.
+     */
+    public function getAvatarUrlAttribute(): ?string
+    {
+        if (!$this->avatar) {
+            return null;
+        }
+
+        // If avatar is already a full URL, return it as is
+        if (str_starts_with($this->avatar, 'http')) {
+            return $this->avatar;
+        }
+
+        // Convert storage path to full URL
+        return url('storage/' . $this->avatar);
     }
 
     public function company()

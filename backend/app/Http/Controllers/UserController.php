@@ -16,6 +16,17 @@ class UserController extends Controller
     {
         $query = User::query();
 
+        // Handle trashed users filter
+        // Options: 'active' (default), 'archived' (only trashed), 'all' (with trashed)
+        $trashedFilter = $request->get('trashed', 'active');
+
+        if ($trashedFilter === 'archived') {
+            $query->onlyTrashed();
+        } elseif ($trashedFilter === 'all') {
+            $query->withTrashed();
+        }
+        // Default: only active users (no withTrashed() call needed)
+
         // Filter by role
         if ($request->has('role')) {
             $query->where('role', $request->role);
@@ -120,6 +131,66 @@ class UserController extends Controller
 
         return response()->json([
             'message' => 'User deleted successfully.',
+        ]);
+    }
+
+    /**
+     * Restore a soft-deleted user.
+     */
+    public function restore(string $id)
+    {
+        $user = User::withTrashed()->findOrFail($id);
+
+        if (!$user->trashed()) {
+            return response()->json([
+                'message' => 'User is not deleted.',
+            ], 400);
+        }
+
+        $user->restore();
+
+        return response()->json([
+            'message' => 'User restored successfully.',
+            'user' => $user,
+        ]);
+    }
+
+    /**
+     * Permanently delete a user (force delete).
+     * Requires confirmation by typing the username.
+     */
+    public function forceDelete(Request $request, string $id)
+    {
+        $validated = $request->validate([
+            'confirmation' => 'required|string',
+        ]);
+
+        $user = User::withTrashed()->findOrFail($id);
+
+        // Check if confirmation matches "username/delete" format
+        $expectedConfirmation = $user->name . '/delete';
+
+        if ($validated['confirmation'] !== $expectedConfirmation) {
+            return response()->json([
+                'message' => 'Confirmation does not match. Please type "' . $expectedConfirmation . '" to permanently delete this user.',
+            ], 400);
+        }
+
+        // Prevent deleting yourself
+        if ($request->user()->id === $user->id) {
+            return response()->json([
+                'message' => 'You cannot permanently delete your own account.',
+            ], 403);
+        }
+
+        // Store user info for response
+        $userName = $user->name;
+
+        // Permanently delete the user
+        $user->forceDelete();
+
+        return response()->json([
+            'message' => 'User "' . $userName . '" has been permanently deleted.',
         ]);
     }
 

@@ -7,9 +7,14 @@ export interface User {
   phone?: string;
   role: 'super_admin' | 'company_admin' | 'agent' | 'customer';
   status: 'active' | 'inactive' | 'suspended';
+  avatar?: string | null;
+  avatar_url?: string | null;
+  company_id?: string | null;
+  preferences?: Record<string, unknown> | null;
   last_login_at?: string;
   created_at: string;
   updated_at: string;
+  deleted_at?: string | null;
 }
 
 export interface LoginRequest {

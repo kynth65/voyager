@@ -48,6 +48,23 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
+        // Check if user exists (including soft-deleted)
+        $user = User::withTrashed()->where('email', $credentials['email'])->first();
+
+        // Check if user is soft-deleted (archived)
+        if ($user && $user->trashed()) {
+            return response()->json([
+                'message' => 'This account has been archived and cannot be used to login. Please contact an administrator.',
+            ], 403);
+        }
+
+        // Check if user account is inactive or suspended
+        if ($user && in_array($user->status, ['inactive', 'suspended'])) {
+            return response()->json([
+                'message' => 'This account is ' . $user->status . '. Please contact an administrator.',
+            ], 403);
+        }
+
         if (!Auth::attempt($credentials)) {
             return response()->json([
                 'message' => 'Invalid credentials',

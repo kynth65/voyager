@@ -1,15 +1,9 @@
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import { LogOut, User, Mail, Phone, Shield, Calendar, Plane } from 'lucide-react';
+import { User, Mail, Phone, Shield, Calendar } from 'lucide-react';
+import Layout from '../components/layout/Layout';
 
 export default function DashboardPage() {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
-
-  const handleLogout = async () => {
-    await logout();
-    navigate('/login');
-  };
+  const { user } = useAuth();
 
   const getRoleBadgeColor = (role: string) => {
     const colors: Record<string, string> = {
@@ -31,44 +25,8 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-      {/* Navigation */}
-      <nav className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <div className="flex-shrink-0 flex items-center space-x-3">
-                <div className="h-10 w-10 flex items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 shadow-md">
-                  <Plane className="h-6 w-6 text-white" />
-                </div>
-                <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                  Voyager
-                </span>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="hidden sm:flex sm:items-center sm:space-x-2">
-                <User className="h-4 w-4 text-gray-500" />
-                <span className="text-sm font-medium text-gray-700">{user?.name}</span>
-                <span className={`ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getRoleBadgeColor(user?.role || '')}`}>
-                  {user?.role?.replace('_', ' ')}
-                </span>
-              </div>
-              <button
-                onClick={handleLogout}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 shadow-sm hover:shadow-md"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
+    <Layout>
+      <div className="space-y-6">
           {/* Welcome Card */}
           <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-xl overflow-hidden mb-6">
             <div className="px-6 py-8 sm:p-10 sm:pb-6">
@@ -221,19 +179,18 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Quick Actions */}
-          <div className="mt-6 bg-white overflow-hidden shadow-lg rounded-2xl border border-gray-100">
-            <div className="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
-              <h3 className="text-lg font-semibold text-gray-900">Quick Actions</h3>
-            </div>
-            <div className="px-6 py-6">
-              <p className="text-sm text-gray-600">
-                More features coming soon! This dashboard will include booking management, customer profiles, and analytics.
-              </p>
-            </div>
+        {/* Quick Actions */}
+        <div className="bg-white overflow-hidden shadow-lg rounded-2xl border border-gray-100">
+          <div className="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+            <h3 className="text-lg font-semibold text-gray-900">Quick Actions</h3>
+          </div>
+          <div className="px-6 py-6">
+            <p className="text-sm text-gray-600">
+              More features coming soon! This dashboard will include booking management, customer profiles, and analytics.
+            </p>
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </Layout>
   );
 }

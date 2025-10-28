@@ -3,15 +3,22 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\DocumentController;
 
 // Public routes
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+
+// Password Reset (public routes)
+Route::post('/password/email', [PasswordResetController::class, 'sendResetLink']);
+Route::post('/password/reset', [PasswordResetController::class, 'resetPassword']);
+Route::post('/password/validate-token', [PasswordResetController::class, 'validateResetToken']);
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
@@ -20,12 +27,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'getCurrentUser']);
 
     // User Profile (accessible to all authenticated users)
-    Route::get('/profile', [UserController::class, 'profile']);
-    Route::put('/profile', [UserController::class, 'updateProfile']);
+    Route::get('/profile', [ProfileController::class, 'getProfile']);
+    Route::put('/profile', [ProfileController::class, 'updateProfile']);
+    Route::post('/profile/avatar', [ProfileController::class, 'uploadAvatar']);
+    Route::delete('/profile/avatar', [ProfileController::class, 'deleteAvatar']);
 
     // User Management (admin only)
     Route::middleware('role:super_admin,company_admin')->group(function () {
         Route::apiResource('users', UserController::class);
+        Route::post('users/{id}/restore', [UserController::class, 'restore']);
+        Route::delete('users/{id}/force', [UserController::class, 'forceDelete']);
         Route::post('users/{user}/assign-role', [UserController::class, 'assignRole']);
         Route::get('users/{user}/permissions', [UserController::class, 'permissions']);
         Route::post('users/{user}/check-permission', [UserController::class, 'checkPermission']);

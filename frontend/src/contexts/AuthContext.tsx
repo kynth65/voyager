@@ -11,6 +11,7 @@ interface AuthContextType {
   login: (credentials: LoginRequest) => Promise<void>;
   register: (data: RegisterRequest) => Promise<void>;
   logout: () => Promise<void>;
+  setUser: (user: User | null) => void;
   refetchUser: () => Promise<void>;
   // Role-based helper methods
   hasRole: (roles: string | string[]) => boolean;
@@ -85,6 +86,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(null);
       setToken(null);
       localStorage.removeItem('auth_token');
+      localStorage.removeItem('user');
+    }
+  };
+
+  const updateUser = (newUser: User | null) => {
+    setUser(newUser);
+    if (newUser) {
+      localStorage.setItem('user', JSON.stringify(newUser));
+    } else {
       localStorage.removeItem('user');
     }
   };
@@ -180,6 +190,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         register,
         logout,
+        setUser: updateUser,
         refetchUser,
         hasRole,
         isSuperAdmin,

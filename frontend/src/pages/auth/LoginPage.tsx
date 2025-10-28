@@ -1,10 +1,10 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth } from '../../contexts/AuthContext';
-import { LogIn, Mail, Lock, AlertCircle, Plane } from 'lucide-react';
+import { LogIn, Mail, Lock, AlertCircle, Plane, CheckCircle } from 'lucide-react';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -16,8 +16,17 @@ type LoginFormData = z.infer<typeof loginSchema>;
 export default function LoginPage() {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const [searchParams] = useSearchParams();
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Check for password reset success message
+  useEffect(() => {
+    if (searchParams.get('reset') === 'success') {
+      setSuccessMessage('Your password has been reset successfully! You can now sign in with your new password.');
+    }
+  }, [searchParams]);
 
   const {
     register,
@@ -60,6 +69,14 @@ export default function LoginPage() {
         {/* Form Card */}
         <div className="mt-8 bg-white py-8 px-6 shadow-xl rounded-2xl border border-gray-100">
           <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
+            {/* Success Alert */}
+            {successMessage && (
+              <div className="rounded-lg bg-green-50 border border-green-200 p-4 flex items-start space-x-3">
+                <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-green-800">{successMessage}</p>
+              </div>
+            )}
+
             {/* Error Alert */}
             {error && (
               <div className="rounded-lg bg-red-50 border border-red-200 p-4 flex items-start space-x-3">
@@ -122,6 +139,14 @@ export default function LoginPage() {
                   {errors.password.message}
                 </p>
               )}
+              <div className="text-sm text-right">
+                <Link
+                  to="/forgot-password"
+                  className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
+                >
+                  Forgot your password?
+                </Link>
+              </div>
             </div>
 
             {/* Submit Button */}
