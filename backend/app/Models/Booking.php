@@ -2,88 +2,111 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Booking extends Model
 {
-    use HasFactory, HasUuids, SoftDeletes;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'booking_reference',
-        'customer_id',
-        'agent_id',
-        'company_id',
+        'user_id',
+        'vessel_id',
+        'route_id',
         'status',
-        'travel_start_date',
-        'travel_end_date',
+        'booking_date',
+        'departure_time',
+        'passengers',
         'total_amount',
-        'total_cost',
-        'commission',
-        'currency',
-        'payment_status',
-        'notes',
-        'internal_notes',
+        'special_requirements',
+        'admin_notes',
         'confirmed_at',
         'cancelled_at',
     ];
 
     protected $casts = [
-        'travel_start_date' => 'date',
-        'travel_end_date' => 'date',
+        'booking_date' => 'date',
+        'departure_time' => 'datetime:H:i',
         'confirmed_at' => 'datetime',
         'cancelled_at' => 'datetime',
+        'total_amount' => 'decimal:2',
     ];
 
-    public function customer()
+    /**
+     * Get the user (customer) who made this booking.
+     */
+    public function user()
     {
-        return $this->belongsTo(Customer::class);
+        return $this->belongsTo(User::class);
     }
 
-    public function agent()
+    /**
+     * Get the vessel for this booking.
+     */
+    public function vessel()
     {
-        return $this->belongsTo(User::class, 'agent_id');
+        return $this->belongsTo(Vessel::class);
     }
 
-    public function company()
+    /**
+     * Get the route for this booking.
+     */
+    public function route()
     {
-        return $this->belongsTo(Company::class);
+        return $this->belongsTo(Route::class);
     }
 
-    public function bookingItems()
+    /**
+     * Get the payment for this booking.
+     */
+    public function payment()
     {
-        return $this->hasMany(BookingItem::class);
+        return $this->hasOne(Payment::class);
     }
 
-    public function travelers()
+    /**
+     * Get the refund for this booking (if any).
+     */
+    public function refund()
     {
-        return $this->hasMany(Traveler::class);
+        return $this->hasOne(Refund::class);
     }
 
-    public function payments()
+    /**
+     * Check if booking is confirmed.
+     */
+    public function isConfirmed(): bool
     {
-        return $this->hasMany(Payment::class);
+        return $this->status === 'confirmed';
     }
 
-    public function invoices()
+    /**
+     * Check if booking is cancelled.
+     */
+    public function isCancelled(): bool
     {
-        return $this->hasMany(Invoice::class);
+        return $this->status === 'cancelled';
     }
 
-    public function documents()
+    /**
+     * Confirm the booking.
+     */
+    public function confirm(): bool
     {
-        return $this->morphMany(Document::class, 'documentable');
+        $this->status = 'confirmed';
+        $this->confirmed_at = now();
+        return $this->save();
     }
 
-    public function communications()
+    /**
+     * Cancel the booking.
+     */
+    public function cancel(): bool
     {
-        return $this->morphMany(Communication::class, 'communicable');
-    }
-
-    public function activityLogs()
-    {
-        return $this->morphMany(ActivityLog::class, 'loggable');
+        $this->status = 'cancelled';
+        $this->cancelled_at = now();
+        return $this->save();
     }
 }
