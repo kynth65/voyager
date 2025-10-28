@@ -1,4 +1,4 @@
-export type VesselType = 'ferry' | 'speedboat';
+export type VesselType = 'ferry' | 'charter' | 'speedboat' | 'yacht';
 export type VesselStatus = 'active' | 'inactive' | 'maintenance';
 
 export interface Vessel {
