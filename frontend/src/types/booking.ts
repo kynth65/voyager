@@ -1,7 +1,7 @@
-import { User } from './user';
-import { Vessel } from './vessel';
-import { Route } from './route';
-import { Payment } from './payment';
+import type { User } from './user';
+import type { Vessel } from './vessel';
+import type { Route } from './route';
+import type { Payment } from './payment';
 
 export type BookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled';
 
@@ -42,6 +42,22 @@ export interface CreateBookingRequest {
   departure_time: string; // Time (HH:MM format)
   passengers: number;
   special_requirements?: string;
+  payment_method: 'credit_card' | 'debit_card' | 'bank_transfer' | 'cash' | 'paypal';
+}
+
+export interface CapacityCheckRequest {
+  route_id: number;
+  booking_date: string;
+  departure_time: string;
+  passengers: number;
+}
+
+export interface CapacityCheckResponse {
+  available: boolean;
+  vessel_capacity: number;
+  booked_seats: number;
+  available_seats: number;
+  requested_seats: number;
 }
 
 export interface UpdateBookingRequest {

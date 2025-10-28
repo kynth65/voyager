@@ -1,17 +1,19 @@
 import apiClient from '../lib/axios';
 import type {
   Booking,
-  CreateFerryBookingRequest,
-  CreateCharterBookingRequest,
+  CreateBookingRequest,
   UpdateBookingRequest,
   BookingListParams,
   BookingListResponse,
   BookingStats,
+  CapacityCheckRequest,
+  CapacityCheckResponse,
 } from '../types/booking';
 
 export const bookingService = {
   /**
    * Get paginated list of bookings with optional filters
+   * Admin sees all bookings, customers see only their own
    */
   async getBookings(params?: BookingListParams): Promise<BookingListResponse> {
     const response = await apiClient.get<BookingListResponse>('/bookings', { params });
@@ -22,48 +24,40 @@ export const bookingService = {
    * Get a single booking by ID
    */
   async getBookingById(id: number): Promise<Booking> {
-    const response = await apiClient.get<{ data: Booking }>(`/bookings/${id}`);
-    return response.data.data;
+    const response = await apiClient.get<Booking>(`/bookings/${id}`);
+    return response.data;
   },
 
   /**
-   * Create a ferry booking
+   * Create a new booking with payment
    */
-  async createFerryBooking(data: CreateFerryBookingRequest): Promise<Booking> {
-    const response = await apiClient.post<{ data: Booking }>('/bookings/ferry', data);
-    return response.data.data;
-  },
-
-  /**
-   * Create a charter booking
-   */
-  async createCharterBooking(data: CreateCharterBookingRequest): Promise<Booking> {
-    const response = await apiClient.post<{ data: Booking }>('/bookings/charter', data);
-    return response.data.data;
+  async createBooking(data: CreateBookingRequest): Promise<{ message: string; booking: Booking }> {
+    const response = await apiClient.post<{ message: string; booking: Booking }>('/bookings', data);
+    return response.data;
   },
 
   /**
    * Update an existing booking
    */
   async updateBooking(id: number, data: UpdateBookingRequest): Promise<Booking> {
-    const response = await apiClient.put<{ data: Booking }>(`/bookings/${id}`, data);
-    return response.data.data;
+    const response = await apiClient.put<Booking>(`/bookings/${id}`, data);
+    return response.data;
   },
 
   /**
    * Confirm a booking (admin only)
    */
-  async confirmBooking(id: number): Promise<Booking> {
-    const response = await apiClient.post<{ data: Booking }>(`/bookings/${id}/confirm`);
-    return response.data.data;
+  async confirmBooking(id: number): Promise<{ message: string; booking: Booking }> {
+    const response = await apiClient.post<{ message: string; booking: Booking }>(`/bookings/${id}/confirm`);
+    return response.data;
   },
 
   /**
-   * Cancel a booking
+   * Cancel a booking (customer can cancel their own, admin can cancel any)
    */
-  async cancelBooking(id: number, reason?: string): Promise<Booking> {
-    const response = await apiClient.post<{ data: Booking }>(`/bookings/${id}/cancel`, { reason });
-    return response.data.data;
+  async cancelBooking(id: number): Promise<{ message: string; booking: Booking }> {
+    const response = await apiClient.post<{ message: string; booking: Booking }>(`/bookings/${id}/cancel`);
+    return response.data;
   },
 
   /**
@@ -71,6 +65,14 @@ export const bookingService = {
    */
   async deleteBooking(id: number): Promise<void> {
     await apiClient.delete(`/bookings/${id}`);
+  },
+
+  /**
+   * Check vessel capacity for a route, date, and time
+   */
+  async checkCapacity(vesselId: number, params: CapacityCheckRequest): Promise<CapacityCheckResponse> {
+    const response = await apiClient.get<CapacityCheckResponse>(`/vessels/${vesselId}/capacity`, { params });
+    return response.data;
   },
 
   /**
@@ -84,28 +86,10 @@ export const bookingService = {
   },
 
   /**
-   * Download charter agreement PDF
-   */
-  async downloadAgreement(id: number): Promise<Blob> {
-    const response = await apiClient.get(`/bookings/${id}/agreement`, {
-      responseType: 'blob',
-    });
-    return response.data;
-  },
-
-  /**
    * Get booking statistics (admin only)
    */
   async getBookingStats(): Promise<BookingStats> {
-    const response = await apiClient.get<{ data: BookingStats }>('/bookings/stats');
-    return response.data.data;
-  },
-
-  /**
-   * Get customer's own bookings
-   */
-  async getMyBookings(params?: BookingListParams): Promise<BookingListResponse> {
-    const response = await apiClient.get<BookingListResponse>('/bookings/my-bookings', { params });
+    const response = await apiClient.get<BookingStats>('/bookings/stats');
     return response.data;
   },
 };
