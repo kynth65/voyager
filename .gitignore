@@ -4,3 +4,5 @@ CLAUDE.md
 
 # Project documentation
 Voyager - project implementation.md
+*.md
+!README.md
