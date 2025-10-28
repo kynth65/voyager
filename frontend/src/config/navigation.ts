@@ -1,16 +1,14 @@
 import {
   LayoutDashboard,
   Users,
-  Building2,
-  Package,
+  Ship,
+  Route as RouteIcon,
   Calendar,
   CreditCard,
   FileText,
-  MessageSquare,
   BarChart3,
   Settings,
   UserCircle,
-  Briefcase,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -41,91 +39,79 @@ export const navigationConfig: NavGroup[] = [
   },
   {
     label: 'Management',
-    roles: ['super_admin', 'company_admin'], // Only admins see this group
+    roles: ['superadmin'], // Only superadmin can manage system
     items: [
       {
-        label: 'Users',
+        label: 'User Management',
         icon: Users,
         href: '/users',
-        roles: ['super_admin', 'company_admin'],
+        roles: ['superadmin'],
       },
       {
-        label: 'Companies',
-        icon: Building2,
-        href: '/companies',
-        roles: ['super_admin'],
+        label: 'Vessels',
+        icon: Ship,
+        href: '/admin/vessels',
+        roles: ['superadmin'],
       },
       {
-        label: 'Suppliers',
-        icon: Briefcase,
-        href: '/suppliers',
-        roles: ['super_admin', 'company_admin'],
+        label: 'Routes',
+        icon: RouteIcon,
+        href: '/admin/routes',
+        roles: ['superadmin'],
       },
     ],
   },
   {
-    label: 'Operations',
-    roles: ['super_admin', 'company_admin', 'agent'],
+    label: 'Bookings',
+    roles: ['superadmin', 'admin', 'customer'],
     items: [
       {
-        label: 'Bookings',
+        label: 'My Bookings',
         icon: Calendar,
         href: '/bookings',
-        roles: ['super_admin', 'company_admin', 'agent'],
+        roles: ['customer'],
+      },
+      {
+        label: 'All Bookings',
+        icon: Calendar,
+        href: '/admin/bookings',
+        roles: ['superadmin', 'admin'],
       },
       {
         label: 'Customers',
         icon: UserCircle,
-        href: '/customers',
-        roles: ['super_admin', 'company_admin', 'agent'],
-      },
-      {
-        label: 'Products',
-        icon: Package,
-        href: '/products',
-        roles: ['super_admin', 'company_admin'],
+        href: '/admin/customers',
+        roles: ['superadmin', 'admin'],
       },
     ],
   },
   {
     label: 'Finance',
-    roles: ['super_admin', 'company_admin', 'agent'],
+    roles: ['superadmin', 'admin'],
     items: [
       {
         label: 'Payments',
         icon: CreditCard,
-        href: '/payments',
-        roles: ['super_admin', 'company_admin', 'agent'],
+        href: '/admin/payments',
+        roles: ['superadmin', 'admin'],
       },
       {
-        label: 'Invoices',
+        label: 'Refunds',
         icon: FileText,
-        href: '/invoices',
-        roles: ['super_admin', 'company_admin'],
-      },
-    ],
-  },
-  {
-    label: 'Communication',
-    roles: ['super_admin', 'company_admin', 'agent'],
-    items: [
-      {
-        label: 'Messages',
-        icon: MessageSquare,
-        href: '/messages',
-        roles: ['super_admin', 'company_admin', 'agent'],
+        href: '/admin/refunds',
+        roles: ['superadmin', 'admin'],
       },
     ],
   },
   {
     label: 'Reports',
-    roles: ['super_admin', 'company_admin'],
+    roles: ['superadmin', 'admin'],
     items: [
       {
         label: 'Analytics',
         icon: BarChart3,
-        href: '/analytics',
-        roles: ['super_admin', 'company_admin'],
+        href: '/admin/analytics',
+        roles: ['superadmin', 'admin'],
       },
     ],
   },
