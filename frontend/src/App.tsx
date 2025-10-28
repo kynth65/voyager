@@ -10,6 +10,11 @@ import ProfilePage from './pages/ProfilePage';
 import UsersPage from './pages/UsersPage';
 import CreateUserPage from './pages/CreateUserPage';
 import EditUserPage from './pages/EditUserPage';
+// Admin pages
+import VesselsPage from './pages/admin/VesselsPage';
+import VesselFormPage from './pages/admin/VesselFormPage';
+import RoutesPage from './pages/admin/RoutesPage';
+import RouteFormPage from './pages/admin/RouteFormPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -137,11 +142,11 @@ function AppRoutes() {
         }
       />
 
-      {/* User Management routes (admin only) */}
+      {/* User Management routes (superadmin only) */}
       <Route
         path="/users"
         element={
-          <RoleBasedRoute allowedRoles={['super_admin', 'company_admin']}>
+          <RoleBasedRoute allowedRoles={['superadmin']}>
             <UsersPage />
           </RoleBasedRoute>
         }
@@ -149,7 +154,7 @@ function AppRoutes() {
       <Route
         path="/users/create"
         element={
-          <RoleBasedRoute allowedRoles={['super_admin', 'company_admin']}>
+          <RoleBasedRoute allowedRoles={['superadmin']}>
             <CreateUserPage />
           </RoleBasedRoute>
         }
@@ -157,8 +162,60 @@ function AppRoutes() {
       <Route
         path="/users/:id/edit"
         element={
-          <RoleBasedRoute allowedRoles={['super_admin', 'company_admin']}>
+          <RoleBasedRoute allowedRoles={['superadmin']}>
             <EditUserPage />
+          </RoleBasedRoute>
+        }
+      />
+
+      {/* Vessel Management routes (superadmin only) */}
+      <Route
+        path="/admin/vessels"
+        element={
+          <RoleBasedRoute allowedRoles={['superadmin']}>
+            <VesselsPage />
+          </RoleBasedRoute>
+        }
+      />
+      <Route
+        path="/admin/vessels/create"
+        element={
+          <RoleBasedRoute allowedRoles={['superadmin']}>
+            <VesselFormPage />
+          </RoleBasedRoute>
+        }
+      />
+      <Route
+        path="/admin/vessels/:id/edit"
+        element={
+          <RoleBasedRoute allowedRoles={['superadmin']}>
+            <VesselFormPage />
+          </RoleBasedRoute>
+        }
+      />
+
+      {/* Route Management routes (superadmin only) */}
+      <Route
+        path="/admin/routes"
+        element={
+          <RoleBasedRoute allowedRoles={['superadmin']}>
+            <RoutesPage />
+          </RoleBasedRoute>
+        }
+      />
+      <Route
+        path="/admin/routes/create"
+        element={
+          <RoleBasedRoute allowedRoles={['superadmin']}>
+            <RouteFormPage />
+          </RoleBasedRoute>
+        }
+      />
+      <Route
+        path="/admin/routes/:id/edit"
+        element={
+          <RoleBasedRoute allowedRoles={['superadmin']}>
+            <RouteFormPage />
           </RoleBasedRoute>
         }
       />
