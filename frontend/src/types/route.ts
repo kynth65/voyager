@@ -1,4 +1,4 @@
-import { Vessel } from './vessel';
+import type { Vessel } from './vessel';
 
 export interface Route {
   id: number;

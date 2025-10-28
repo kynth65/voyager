@@ -1,5 +1,7 @@
 import type { User } from './auth';
 
+export type { User };
+
 export interface CreateUserRequest {
   name: string;
   email: string;
@@ -7,7 +9,7 @@ export interface CreateUserRequest {
   first_name?: string;
   last_name?: string;
   phone?: string;
-  role: 'super_admin' | 'company_admin' | 'agent' | 'customer';
+  role: 'superadmin' | 'admin' | 'agent' | 'customer';
   status?: 'active' | 'inactive' | 'suspended';
   company_id?: string;
 }
@@ -19,7 +21,7 @@ export interface UpdateUserRequest {
   first_name?: string;
   last_name?: string;
   phone?: string;
-  role?: 'super_admin' | 'company_admin' | 'agent' | 'customer';
+  role?: 'superadmin' | 'admin' | 'agent' | 'customer';
   status?: 'active' | 'inactive' | 'suspended';
   company_id?: string;
 }
@@ -50,7 +52,7 @@ export interface UserResponse {
 }
 
 export interface AssignRoleRequest {
-  role: 'super_admin' | 'company_admin' | 'agent' | 'customer';
+  role: 'superadmin' | 'admin' | 'agent' | 'customer';
 }
 
 export interface UserPermissionsResponse {

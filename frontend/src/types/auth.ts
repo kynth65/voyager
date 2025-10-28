@@ -5,7 +5,7 @@ export interface User {
   first_name?: string;
   last_name?: string;
   phone?: string;
-  role: 'super_admin' | 'company_admin' | 'agent' | 'customer';
+  role: 'superadmin' | 'admin' | 'agent' | 'customer';
   status: 'active' | 'inactive' | 'suspended';
   avatar?: string | null;
   avatar_url?: string | null;

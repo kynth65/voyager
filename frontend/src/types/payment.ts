@@ -1,4 +1,4 @@
-import { Booking } from './booking';
+import type { Booking } from './booking';
 
 export type PaymentMethod = 'cash' | 'credit_card' | 'debit_card' | 'bank_transfer' | 'gcash' | 'paymaya';
 export type PaymentStatus = 'pending' | 'completed' | 'failed' | 'refunded';
