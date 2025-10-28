@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('vessels', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->enum('type', ['ferry', 'speedboat'])->default('ferry');
+            $table->enum('type', ['ferry', 'speedboat', 'charter', 'yacht'])->default('ferry');
             $table->integer('capacity'); // Maximum number of passengers
             $table->text('description')->nullable();
             $table->string('image')->nullable(); // Vessel photo

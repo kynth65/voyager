@@ -90,7 +90,7 @@ class VesselController extends Controller
 
         return response()->json([
             'message' => 'Vessel created successfully',
-            'vessel' => $vessel,
+            'data' => $vessel,
         ], 201);
     }
 
@@ -102,7 +102,7 @@ class VesselController extends Controller
         $vessel = Vessel::withTrashed()->with(['routes', 'bookings'])->findOrFail($id);
 
         return response()->json([
-            'vessel' => $vessel,
+            'data' => $vessel,
         ]);
     }
 
@@ -152,7 +152,7 @@ class VesselController extends Controller
 
         return response()->json([
             'message' => 'Vessel updated successfully',
-            'vessel' => $vessel->fresh(),
+            'data' => $vessel->fresh(),
         ]);
     }
 
@@ -198,7 +198,7 @@ class VesselController extends Controller
 
         return response()->json([
             'message' => 'Vessel restored successfully',
-            'vessel' => $vessel,
+            'data' => $vessel,
         ]);
     }
 
@@ -231,7 +231,7 @@ class VesselController extends Controller
 
         return response()->json([
             'message' => 'Image uploaded successfully',
-            'vessel' => $vessel->fresh(),
+            'data' => $vessel->fresh(),
         ]);
     }
 
