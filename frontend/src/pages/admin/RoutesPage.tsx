@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { routeService } from '../../services/route';
-import type { RouteListParams } from '../../types/route';
+import type { RouteListParams, Route } from '../../types/route';
 import Layout from '../../components/layout/Layout';
 
 export default function RoutesPage() {
@@ -11,7 +11,7 @@ export default function RoutesPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
-  const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
+  const [routeToDelete, setRouteToDelete] = useState<Route | null>(null);
 
   const params: RouteListParams = {
     page,
@@ -29,7 +29,7 @@ export default function RoutesPage() {
     mutationFn: routeService.deleteRoute,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['routes'] });
-      setDeleteConfirm(null);
+      setRouteToDelete(null);
     },
   });
 
@@ -40,8 +40,10 @@ export default function RoutesPage() {
     },
   });
 
-  const handleDelete = (id: number) => {
-    deleteMutation.mutate(id);
+  const handleDeleteConfirm = () => {
+    if (routeToDelete) {
+      deleteMutation.mutate(routeToDelete.id);
+    }
   };
 
   const handleRestore = (id: number) => {
@@ -192,29 +194,12 @@ export default function RoutesPage() {
                             >
                               Edit
                             </button>
-                            {deleteConfirm === route.id ? (
-                              <div className="inline-flex items-center">
-                                <button
-                                  onClick={() => handleDelete(route.id)}
-                                  className="text-red-600 hover:text-red-900 mr-2"
-                                >
-                                  Confirm
-                                </button>
-                                <button
-                                  onClick={() => setDeleteConfirm(null)}
-                                  className="text-gray-600 hover:text-gray-900"
-                                >
-                                  Cancel
-                                </button>
-                              </div>
-                            ) : (
-                              <button
-                                onClick={() => setDeleteConfirm(route.id)}
-                                className="text-red-600 hover:text-red-900"
-                              >
-                                Delete
-                              </button>
-                            )}
+                            <button
+                              onClick={() => setRouteToDelete(route)}
+                              className="text-red-600 hover:text-red-900"
+                            >
+                              Delete
+                            </button>
                           </>
                         )}
                       </td>
@@ -272,6 +257,53 @@ export default function RoutesPage() {
               </div>
             )}
           </>
+        )}
+
+        {/* Delete Confirmation Modal */}
+        {routeToDelete && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg max-w-md w-full p-6 shadow-xl">
+              <div className="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 rounded-full mb-4">
+                <svg
+                  className="w-6 h-6 text-red-600"
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+
+              <h3 className="text-lg font-semibold text-gray-900 text-center mb-2">
+                Delete Route
+              </h3>
+
+              <p className="text-sm text-gray-600 text-center mb-6">
+                Are you sure you want to delete the route <strong>{routeToDelete.origin} → {routeToDelete.destination}</strong>?
+                This action will soft delete the route and it can be restored later.
+              </p>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setRouteToDelete(null)}
+                  disabled={deleteMutation.isPending}
+                  className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteConfirm}
+                  disabled={deleteMutation.isPending}
+                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                >
+                  {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </Layout>

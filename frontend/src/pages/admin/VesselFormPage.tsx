@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
@@ -26,18 +26,6 @@ export default function VesselFormPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    formState: { errors },
-  } = useForm<VesselFormData>({
-    resolver: zodResolver(vesselSchema),
-    defaultValues: {
-      status: 'active',
-    },
-  });
-
   // Fetch vessel data if editing
   const { data: vessel, isLoading } = useQuery({
     queryKey: ['vessel', id],
@@ -45,18 +33,42 @@ export default function VesselFormPage() {
     enabled: isEditMode,
   });
 
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<VesselFormData>({
+    resolver: zodResolver(vesselSchema),
+    defaultValues: {
+      status: 'active',
+      name: '',
+      type: '',
+      capacity: 0,
+      description: '',
+    },
+  });
+
+  // Pre-populate form when vessel data is loaded
   useEffect(() => {
     if (vessel) {
-      setValue('name', vessel.name);
-      setValue('type', vessel.type);
-      setValue('capacity', vessel.capacity);
-      setValue('description', vessel.description || '');
-      setValue('status', vessel.status);
-      if (vessel.image) {
-        setImagePreview(vessel.image);
+      reset({
+        name: vessel.name,
+        type: vessel.type,
+        capacity: vessel.capacity,
+        description: vessel.description || '',
+        status: vessel.status,
+      });
+
+      // Set image preview if vessel has an image
+      if (vessel.image_url) {
+        setImagePreview(vessel.image_url);
+      } else if (vessel.image) {
+        // Fallback to image path if image_url is not available
+        setImagePreview(`${import.meta.env.VITE_API_URL?.replace('/api', '')}/storage/${vessel.image}`);
       }
     }
-  }, [vessel, setValue]);
+  }, [vessel, reset]);
 
   const createMutation = useMutation({
     mutationFn: vesselService.createVessel,
@@ -234,10 +246,10 @@ export default function VesselFormPage() {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Select type...</option>
-              <option value="Ferry">Ferry</option>
-              <option value="Yacht">Yacht</option>
-              <option value="Speedboat">Speedboat</option>
-              <option value="Catamaran">Catamaran</option>
+              <option value="ferry">Ferry</option>
+              <option value="charter">Charter</option>
+              <option value="speedboat">Speedboat</option>
+              <option value="yacht">Yacht</option>
             </select>
             {errors.type && <p className="mt-1 text-sm text-red-600">{errors.type.message}</p>}
           </div>

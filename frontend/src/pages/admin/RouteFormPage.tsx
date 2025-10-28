@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
@@ -27,18 +27,6 @@ export default function RouteFormPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    formState: { errors },
-  } = useForm<RouteFormData>({
-    resolver: zodResolver(routeSchema),
-    defaultValues: {
-      status: 'active',
-    },
-  });
-
   // Fetch route data if editing
   const { data: route, isLoading } = useQuery({
     queryKey: ['route', id],
@@ -52,17 +40,48 @@ export default function RouteFormPage() {
     queryFn: () => vesselService.getVessels({ status: 'active', per_page: 100 }),
   });
 
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<RouteFormData>({
+    resolver: zodResolver(routeSchema),
+    defaultValues: {
+      status: 'active',
+      vessel_id: 0,
+      origin: '',
+      destination: '',
+      price: 0,
+      duration: 0,
+      schedule: '',
+    },
+  });
+
+  // Pre-populate form when route data is loaded
   useEffect(() => {
     if (route) {
-      setValue('vessel_id', route.vessel_id);
-      setValue('origin', route.origin);
-      setValue('destination', route.destination);
-      setValue('price', route.price);
-      setValue('duration', route.duration);
-      setValue('schedule', route.schedule || '');
-      setValue('status', route.status);
+      // Convert schedule from JSON object to string for textarea
+      let scheduleString = '';
+      if (route.schedule) {
+        if (typeof route.schedule === 'string') {
+          scheduleString = route.schedule;
+        } else {
+          scheduleString = JSON.stringify(route.schedule, null, 2);
+        }
+      }
+
+      reset({
+        vessel_id: route.vessel_id,
+        origin: route.origin,
+        destination: route.destination,
+        price: route.price,
+        duration: route.duration,
+        schedule: scheduleString,
+        status: route.status,
+      });
     }
-  }, [route, setValue]);
+  }, [route, reset]);
 
   const createMutation = useMutation({
     mutationFn: routeService.createRoute,
@@ -89,10 +108,29 @@ export default function RouteFormPage() {
   const onSubmit = (data: RouteFormData) => {
     setError(null);
     setSuccess(null);
-    if (isEditMode) {
-      updateMutation.mutate(data);
+
+    // Prepare data for submission
+    const submitData = { ...data };
+
+    // Handle schedule field - convert to JSON string or null
+    if (submitData.schedule && submitData.schedule.trim() !== '') {
+      try {
+        // Try to parse as JSON first (in case user entered JSON)
+        JSON.parse(submitData.schedule);
+        // If it's already valid JSON, send as is
+      } catch {
+        // If not valid JSON, wrap in quotes to make it a valid JSON string
+        submitData.schedule = JSON.stringify(submitData.schedule);
+      }
     } else {
-      createMutation.mutate(data);
+      // If empty, send null
+      submitData.schedule = undefined;
+    }
+
+    if (isEditMode) {
+      updateMutation.mutate(submitData);
+    } else {
+      createMutation.mutate(submitData);
     }
   };
 
@@ -221,14 +259,14 @@ export default function RouteFormPage() {
             <textarea
               {...register('schedule')}
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="e.g., Daily departures at 8:00 AM, 12:00 PM, 4:00 PM"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+              placeholder='e.g., Daily departures at 8:00 AM, 12:00 PM, 4:00 PM&#x0a;or JSON: {"monday": ["08:00", "12:00"], "tuesday": ["08:00", "14:00"]}'
             />
             {errors.schedule && (
               <p className="mt-1 text-sm text-red-600">{errors.schedule.message}</p>
             )}
             <p className="mt-1 text-sm text-gray-500">
-              Describe the departure schedule (optional)
+              Enter plain text or JSON format (optional)
             </p>
           </div>
 
