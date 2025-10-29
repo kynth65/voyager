@@ -12,7 +12,6 @@ import {
   ArrowLeft,
   MapPin,
   CreditCard,
-  FileText,
 } from 'lucide-react';
 import { bookingService } from '../../services/booking';
 import type { BookingStatus } from '../../types/booking';

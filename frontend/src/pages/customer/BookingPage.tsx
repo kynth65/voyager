@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { useForm } from 'react-hook-form';
+import { useForm, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import {
@@ -10,7 +10,6 @@ import {
   Calendar,
   Clock,
   Users,
-  DollarSign,
   CreditCard,
   AlertCircle,
   CheckCircle,
@@ -24,7 +23,7 @@ import type { CreateBookingRequest } from '../../types/booking';
 const bookingSchema = z.object({
   booking_date: z.string().min(1, 'Please select a travel date'),
   departure_time: z.string().min(1, 'Please select a departure time'),
-  passengers: z.coerce.number().min(1, 'At least 1 passenger is required').max(50, 'Maximum 50 passengers'),
+  passengers: z.number().min(1, 'At least 1 passenger is required').max(50, 'Maximum 50 passengers'),
   special_requirements: z.string().optional(),
   payment_method: z.enum(['credit_card', 'debit_card', 'bank_transfer', 'cash', 'paypal']),
 });
@@ -70,7 +69,7 @@ export default function BookingPage() {
     },
   });
 
-  const onSubmit = (data: BookingFormData) => {
+  const onSubmit: SubmitHandler<BookingFormData> = (data) => {
     if (!route) return;
 
     const bookingData: CreateBookingRequest = {
@@ -224,7 +223,7 @@ export default function BookingPage() {
                   </label>
                   <input
                     type="number"
-                    {...register('passengers')}
+                    {...register('passengers', { valueAsNumber: true })}
                     min="1"
                     max="50"
                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"

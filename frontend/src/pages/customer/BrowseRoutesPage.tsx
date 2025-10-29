@@ -1,16 +1,20 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { Ship, MapPin, Clock, DollarSign, Users, Search, Filter } from 'lucide-react';
+import { Ship, MapPin, Clock, Users, Search, Filter } from 'lucide-react';
 import { routeService } from '../../services/route';
 import type { Route } from '../../types/route';
 import Layout from '../../components/layout/Layout';
+import { useDebounce } from '../../hooks/useDebounce';
 
 export default function BrowseRoutesPage() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOrigin, setSelectedOrigin] = useState('');
   const [selectedDestination, setSelectedDestination] = useState('');
+
+  // Debounce search input to avoid re-filtering on every keystroke
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   // Fetch all routes
   const { data, isLoading, error } = useQuery({
@@ -24,12 +28,12 @@ export default function BrowseRoutesPage() {
   const origins = Array.from(new Set(routes.map(route => route.origin)));
   const destinations = Array.from(new Set(routes.map(route => route.destination)));
 
-  // Filter routes based on search and filters
+  // Filter routes based on search and filters (using debounced search)
   const filteredRoutes = routes.filter(route => {
-    const matchesSearch = searchTerm === '' ||
-      route.origin.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      route.destination.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      route.vessel?.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = debouncedSearchTerm === '' ||
+      route.origin.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+      route.destination.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+      route.vessel?.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
 
     const matchesOrigin = selectedOrigin === '' || route.origin === selectedOrigin;
     const matchesDestination = selectedDestination === '' || route.destination === selectedDestination;
