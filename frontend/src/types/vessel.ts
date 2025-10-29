@@ -56,3 +56,10 @@ export interface VesselCapacityCheck {
   available_capacity: number;
   is_available: boolean;
 }
+
+export interface VesselAvailability {
+  available: boolean;
+  vessel_capacity: number;
+  booked_seats: number;
+  available_seats: number;
+}

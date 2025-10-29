@@ -37,6 +37,7 @@ export interface Booking {
 }
 
 export interface CreateBookingRequest {
+  user_id?: number; // Optional: admin/superadmin can create booking for specific customer
   route_id: number;
   booking_date: string; // Date of travel
   departure_time: string; // Time (HH:MM format)
@@ -86,6 +87,8 @@ export interface BookingListResponse {
   last_page: number;
   per_page: number;
   total: number;
+  from: number;
+  to: number;
 }
 
 export interface BookingStats {
