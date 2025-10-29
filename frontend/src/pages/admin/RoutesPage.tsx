@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { routeService } from '../../services/route';
 import type { RouteListParams, Route } from '../../types/route';
 import Layout from '../../components/layout/Layout';
+import { useDebounce } from '../../hooks/useDebounce';
 
 export default function RoutesPage() {
   const navigate = useNavigate();
@@ -13,10 +14,13 @@ export default function RoutesPage() {
   const [statusFilter, setStatusFilter] = useState('');
   const [routeToDelete, setRouteToDelete] = useState<Route | null>(null);
 
+  // Debounce search input to avoid triggering queries on every keystroke
+  const debouncedSearch = useDebounce(search, 500);
+
   const params: RouteListParams = {
     page,
     per_page: 10,
-    ...(search && { search }),
+    ...(debouncedSearch && { search: debouncedSearch }),
     ...(statusFilter && { status: statusFilter as 'active' | 'inactive' }),
   };
 

@@ -15,7 +15,7 @@ const routeSchema = z.object({
   price: z.number().min(0, 'Price must be a positive number'),
   duration: z.number().min(1, 'Duration must be at least 1 minute'),
   schedule: z.string().optional(),
-  status: z.enum(['active', 'inactive']).default('active'),
+  status: z.enum(['active', 'inactive']),
 });
 
 type RouteFormData = z.infer<typeof routeSchema>;
