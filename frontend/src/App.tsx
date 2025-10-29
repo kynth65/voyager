@@ -16,11 +16,13 @@ import VesselFormPage from './pages/admin/VesselFormPage';
 import RoutesPage from './pages/admin/RoutesPage';
 import RouteFormPage from './pages/admin/RouteFormPage';
 import AdminBookingsPage from './pages/admin/AdminBookingsPage';
+import AdminCreateBookingPage from './pages/admin/AdminCreateBookingPage';
 // Customer pages
 import LandingPage from './pages/LandingPage';
 import BrowseRoutesPage from './pages/customer/BrowseRoutesPage';
 import BookingPage from './pages/customer/BookingPage';
 import MyBookingsPage from './pages/customer/MyBookingsPage';
+import BookingDetailsPage from './pages/customer/BookingDetailsPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -183,6 +185,14 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/bookings/:id"
+        element={
+          <ProtectedRoute>
+            <BookingDetailsPage />
+          </ProtectedRoute>
+        }
+      />
 
       {/* User Management routes (superadmin only) */}
       <Route
@@ -268,6 +278,14 @@ function AppRoutes() {
         element={
           <RoleBasedRoute allowedRoles={['superadmin', 'admin']}>
             <AdminBookingsPage />
+          </RoleBasedRoute>
+        }
+      />
+      <Route
+        path="/admin/bookings/create"
+        element={
+          <RoleBasedRoute allowedRoles={['superadmin', 'admin']}>
+            <AdminCreateBookingPage />
           </RoleBasedRoute>
         }
       />
