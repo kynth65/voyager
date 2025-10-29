@@ -2,24 +2,28 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { vesselService } from '../../services/vessel';
-import type { VesselListParams, Vessel } from '../../types/vessel';
+import type { VesselListParams, Vessel, VesselType, VesselStatus } from '../../types/vessel';
 import Layout from '../../components/layout/Layout';
+import { useDebounce } from '../../hooks/useDebounce';
 
 export default function VesselsPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
-  const [typeFilter, setTypeFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  const [typeFilter, setTypeFilter] = useState<VesselType | ''>('');
+  const [statusFilter, setStatusFilter] = useState<VesselStatus | ''>('');
   const [vesselToDelete, setVesselToDelete] = useState<Vessel | null>(null);
+
+  // Debounce search input to avoid triggering queries on every keystroke
+  const debouncedSearch = useDebounce(search, 500);
 
   const params: VesselListParams = {
     page,
     per_page: 10,
-    ...(search && { search }),
+    ...(debouncedSearch && { search: debouncedSearch }),
     ...(typeFilter && { type: typeFilter }),
-    ...(statusFilter && { status: statusFilter as 'active' | 'inactive' | 'maintenance' }),
+    ...(statusFilter && { status: statusFilter }),
   };
 
   const { data, isLoading, error } = useQuery({
@@ -86,7 +90,7 @@ export default function VesselsPage() {
               <select
                 value={typeFilter}
                 onChange={(e) => {
-                  setTypeFilter(e.target.value);
+                  setTypeFilter(e.target.value as VesselType | '');
                   setPage(1);
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -103,7 +107,7 @@ export default function VesselsPage() {
               <select
                 value={statusFilter}
                 onChange={(e) => {
-                  setStatusFilter(e.target.value);
+                  setStatusFilter(e.target.value as VesselStatus | '');
                   setPage(1);
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"

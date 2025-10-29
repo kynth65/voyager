@@ -5,6 +5,7 @@ import type {
   UpdateVesselRequest,
   VesselListParams,
   VesselListResponse,
+  VesselAvailability,
 } from '../types/vessel';
 
 export const vesselService = {

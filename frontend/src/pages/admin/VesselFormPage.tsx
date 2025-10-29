@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { useForm } from 'react-hook-form';
+import { useForm, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { vesselService } from '../../services/vessel';
@@ -9,10 +9,10 @@ import Layout from '../../components/layout/Layout';
 
 const vesselSchema = z.object({
   name: z.string().min(1, 'Name is required').max(255),
-  type: z.string().min(1, 'Type is required'),
+  type: z.enum(['ferry', 'charter', 'speedboat', 'yacht'] as const),
   capacity: z.number().min(1, 'Capacity must be at least 1'),
   description: z.string().optional(),
-  status: z.enum(['active', 'inactive', 'maintenance']).default('active'),
+  status: z.enum(['active', 'inactive', 'maintenance'] as const),
 });
 
 type VesselFormData = z.infer<typeof vesselSchema>;
@@ -43,7 +43,7 @@ export default function VesselFormPage() {
     defaultValues: {
       status: 'active',
       name: '',
-      type: '',
+      type: 'ferry',
       capacity: 0,
       description: '',
     },
@@ -108,7 +108,7 @@ export default function VesselFormPage() {
     },
   });
 
-  const onSubmit = (data: VesselFormData) => {
+  const onSubmit: SubmitHandler<VesselFormData> = (data) => {
     setError(null);
     setSuccess(null);
     if (isEditMode) {
