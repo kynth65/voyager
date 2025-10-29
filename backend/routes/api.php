@@ -12,6 +12,7 @@ use App\Http\Controllers\VesselController;
 use App\Http\Controllers\RouteController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\CustomerController;
 
 // Public routes
 Route::post('/register', [AuthController::class, 'register']);
@@ -78,6 +79,13 @@ Route::middleware('auth:sanctum')->group(function () {
     // Payments
     Route::apiResource('payments', PaymentController::class);
     Route::post('payments/{payment}/process', [PaymentController::class, 'process']);
+
+    // Customer Management (admin and superadmin only)
+    Route::middleware('role:superadmin,admin')->group(function () {
+        Route::get('customers', [CustomerController::class, 'index']);
+        Route::get('customers/{id}', [CustomerController::class, 'show']);
+        Route::get('customers/{id}/bookings', [CustomerController::class, 'bookings']);
+    });
 
     // Suppliers (superadmin and admin can manage)
     Route::middleware('role:superadmin,admin')->group(function () {
