@@ -17,6 +17,8 @@ import RoutesPage from './pages/admin/RoutesPage';
 import RouteFormPage from './pages/admin/RouteFormPage';
 import AdminBookingsPage from './pages/admin/AdminBookingsPage';
 import AdminCreateBookingPage from './pages/admin/AdminCreateBookingPage';
+import CustomersPage from './pages/admin/CustomersPage';
+import CustomerDetailsPage from './pages/admin/CustomerDetailsPage';
 // Customer pages
 import LandingPage from './pages/LandingPage';
 import BrowseRoutesPage from './pages/customer/BrowseRoutesPage';
@@ -286,6 +288,24 @@ function AppRoutes() {
         element={
           <RoleBasedRoute allowedRoles={['superadmin', 'admin']}>
             <AdminCreateBookingPage />
+          </RoleBasedRoute>
+        }
+      />
+
+      {/* Customer Management (superadmin and admin) */}
+      <Route
+        path="/admin/customers"
+        element={
+          <RoleBasedRoute allowedRoles={['superadmin', 'admin']}>
+            <CustomersPage />
+          </RoleBasedRoute>
+        }
+      />
+      <Route
+        path="/admin/customers/:id"
+        element={
+          <RoleBasedRoute allowedRoles={['superadmin', 'admin']}>
+            <CustomerDetailsPage />
           </RoleBasedRoute>
         }
       />
