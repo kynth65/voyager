@@ -69,6 +69,7 @@ class BookingController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'user_id' => 'nullable|exists:users,id', // Optional: admin/superadmin can create booking for any customer
             'route_id' => 'required|exists:routes,id',
             'booking_date' => 'required|date|after_or_equal:today',
             'departure_time' => 'required|date_format:H:i',
@@ -79,6 +80,20 @@ class BookingController extends Controller
 
         try {
             DB::beginTransaction();
+
+            // Determine which user the booking is for
+            // If admin/superadmin provides user_id, use that; otherwise use authenticated user
+            $bookingUserId = $request->user()->id; // Default to authenticated user
+
+            if (isset($validated['user_id'])) {
+                // Only admin and superadmin can create bookings for other users
+                if (!in_array($request->user()->role, ['admin', 'superadmin'])) {
+                    return response()->json([
+                        'message' => 'Unauthorized. Only admins can create bookings for other users.'
+                    ], 403);
+                }
+                $bookingUserId = $validated['user_id'];
+            }
 
             // Get the route with vessel
             $route = Route::with('vessel')->findOrFail($validated['route_id']);
@@ -114,7 +129,7 @@ class BookingController extends Controller
             // Create booking
             $booking = Booking::create([
                 'booking_reference' => $bookingReference,
-                'user_id' => $request->user()->id,
+                'user_id' => $bookingUserId,
                 'vessel_id' => $route->vessel_id,
                 'route_id' => $validated['route_id'],
                 'status' => 'pending',
