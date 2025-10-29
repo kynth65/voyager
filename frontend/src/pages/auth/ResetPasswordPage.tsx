@@ -23,7 +23,6 @@ export default function ResetPasswordPage() {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isValidating, setIsValidating] = useState(true);
-  const [isTokenValid, setIsTokenValid] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
 
@@ -49,9 +48,7 @@ export default function ResetPasswordPage() {
 
       try {
         const response = await passwordResetService.validateToken({ token, email });
-        if (response.valid) {
-          setIsTokenValid(true);
-        } else {
+        if (!response.valid) {
           setValidationError(response.message);
         }
       } catch (error: any) {

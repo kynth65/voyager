@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { Ship, MapPin, Clock, DollarSign, Users, Search, Filter } from 'lucide-react';
+import { Ship, MapPin, Clock, Users, Search, Filter } from 'lucide-react';
 import { routeService } from '../services/route';
 import type { Route } from '../types/route';
 
