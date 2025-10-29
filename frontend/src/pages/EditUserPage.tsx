@@ -14,7 +14,7 @@ const userSchema = z.object({
   email: z.string().email('Invalid email address').max(255).optional(),
   password: z.string().min(8, 'Password must be at least 8 characters').optional().or(z.literal('')),
   phone: z.string().max(20).optional(),
-  role: z.enum(['super_admin', 'company_admin', 'agent', 'customer']).optional(),
+  role: z.enum(['superadmin', 'admin', 'agent', 'customer']).optional(),
   status: z.enum(['active', 'inactive', 'suspended']).optional(),
   company_id: z.string().optional(),
 });

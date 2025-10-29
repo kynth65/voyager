@@ -20,6 +20,7 @@ import { getUsers, deleteUser, restoreUser, forceDeleteUser } from '../services/
 import type { User } from '../types/auth';
 import type { UserListParams } from '../types/user';
 import Layout from '../components/layout/Layout';
+import { useDebounce } from '../hooks/useDebounce';
 
 type TabType = 'active' | 'archived';
 
@@ -35,12 +36,15 @@ export default function UsersPage() {
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
   const [confirmationText, setConfirmationText] = useState('');
 
+  // Debounce search input to avoid triggering queries on every keystroke
+  const debouncedSearch = useDebounce(search, 500);
+
   // Build query params
   const params: UserListParams = {
     page,
     per_page: 15,
     trashed: activeTab, // 'active' or 'archived'
-    ...(search && { search }),
+    ...(debouncedSearch && { search: debouncedSearch }),
     ...(roleFilter && { role: roleFilter }),
     ...(statusFilter && { status: statusFilter }),
   };
