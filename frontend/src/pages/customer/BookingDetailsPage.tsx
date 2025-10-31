@@ -256,7 +256,7 @@ export default function BookingDetailsPage() {
                 <div>
                   <p className="text-sm text-gray-600">Payment Method</p>
                   <p className="font-medium text-gray-900">
-                    {booking.payment.method?.replace('_', ' ').toUpperCase() || 'N/A'}
+                    {booking.payment.payment_method?.replace('_', ' ').toUpperCase() || 'N/A'}
                   </p>
                 </div>
               </div>

@@ -19,6 +19,10 @@ import AdminBookingsPage from './pages/admin/AdminBookingsPage';
 import AdminCreateBookingPage from './pages/admin/AdminCreateBookingPage';
 import CustomersPage from './pages/admin/CustomersPage';
 import CustomerDetailsPage from './pages/admin/CustomerDetailsPage';
+import PaymentsPage from './pages/admin/PaymentsPage';
+import RefundsPage from './pages/admin/RefundsPage';
+import AnalyticsPage from './pages/admin/AnalyticsPage';
+import AccountingPage from './pages/admin/AccountingPage';
 // Customer pages
 import LandingPage from './pages/LandingPage';
 import BrowseRoutesPage from './pages/customer/BrowseRoutesPage';
@@ -306,6 +310,46 @@ function AppRoutes() {
         element={
           <RoleBasedRoute allowedRoles={['superadmin', 'admin']}>
             <CustomerDetailsPage />
+          </RoleBasedRoute>
+        }
+      />
+
+      {/* Payments Management (superadmin and admin) */}
+      <Route
+        path="/admin/payments"
+        element={
+          <RoleBasedRoute allowedRoles={['superadmin', 'admin']}>
+            <PaymentsPage />
+          </RoleBasedRoute>
+        }
+      />
+
+      {/* Refunds Management (superadmin and admin) */}
+      <Route
+        path="/admin/refunds"
+        element={
+          <RoleBasedRoute allowedRoles={['superadmin', 'admin']}>
+            <RefundsPage />
+          </RoleBasedRoute>
+        }
+      />
+
+      {/* Analytics (superadmin and admin) */}
+      <Route
+        path="/admin/analytics"
+        element={
+          <RoleBasedRoute allowedRoles={['superadmin', 'admin']}>
+            <AnalyticsPage />
+          </RoleBasedRoute>
+        }
+      />
+
+      {/* Accounting (superadmin and admin) */}
+      <Route
+        path="/admin/accounting"
+        element={
+          <RoleBasedRoute allowedRoles={['superadmin', 'admin']}>
+            <AccountingPage />
           </RoleBasedRoute>
         }
       />

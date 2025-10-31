@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\RefundController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\VesselController;
@@ -79,6 +80,10 @@ Route::middleware('auth:sanctum')->group(function () {
     // Payments
     Route::apiResource('payments', PaymentController::class);
     Route::post('payments/{payment}/process', [PaymentController::class, 'process']);
+
+    // Refunds
+    Route::apiResource('refunds', RefundController::class);
+    Route::post('refunds/{refund}/process', [RefundController::class, 'process']);
 
     // Customer Management (admin and superadmin only)
     Route::middleware('role:superadmin,admin')->group(function () {

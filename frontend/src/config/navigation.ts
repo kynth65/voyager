@@ -11,6 +11,7 @@ import {
   UserCircle,
   Home,
   BookOpen,
+  DollarSign,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -103,6 +104,12 @@ export const navigationConfig: NavGroup[] = [
     label: 'Finance',
     roles: ['superadmin', 'admin'],
     items: [
+      {
+        label: 'Accounting',
+        icon: DollarSign,
+        href: '/admin/accounting',
+        roles: ['superadmin', 'admin'],
+      },
       {
         label: 'Payments',
         icon: CreditCard,

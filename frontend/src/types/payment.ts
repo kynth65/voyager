@@ -6,7 +6,7 @@ export type PaymentStatus = 'pending' | 'completed' | 'failed' | 'refunded';
 export interface Payment {
   id: number;
   booking_id: number;
-  method: PaymentMethod;
+  payment_method: PaymentMethod;
   amount: number;
   status: PaymentStatus;
   transaction_id: string | null;
@@ -19,7 +19,7 @@ export interface Payment {
 
 export interface CreatePaymentRequest {
   booking_id: number;
-  method: PaymentMethod;
+  payment_method: PaymentMethod;
   amount: number;
   notes?: string;
 }
@@ -34,9 +34,10 @@ export interface PaymentListParams {
   per_page?: number;
   booking_id?: number;
   status?: PaymentStatus;
-  method?: PaymentMethod;
-  start_date?: string;
-  end_date?: string;
+  payment_method?: PaymentMethod;
+  from_date?: string;
+  to_date?: string;
+  search?: string;
 }
 
 export interface PaymentListResponse {
@@ -52,16 +53,17 @@ export type RefundStatus = 'pending' | 'approved' | 'rejected' | 'processed';
 export interface Refund {
   id: number;
   booking_id: number;
-  payment_id: number;
   amount: number;
   reason: string;
   status: RefundStatus;
+  processed_by: number | null;
+  approved_at: string | null;
   processed_at: string | null;
-  notes: string | null;
+  admin_notes: string | null;
   created_at: string;
   updated_at: string;
   booking?: Booking;
-  payment?: Payment;
+  processedBy?: { id: number; name: string; email: string };
 }
 
 export interface CreateRefundRequest {
@@ -73,7 +75,7 @@ export interface CreateRefundRequest {
 
 export interface ProcessRefundRequest {
   refund_id: number;
-  status: 'approved' | 'rejected';
+  status: 'approve' | 'reject' | 'process';
   notes?: string;
 }
 
@@ -82,8 +84,9 @@ export interface RefundListParams {
   per_page?: number;
   booking_id?: number;
   status?: RefundStatus;
-  start_date?: string;
-  end_date?: string;
+  from_date?: string;
+  to_date?: string;
+  search?: string;
 }
 
 export interface RefundListResponse {

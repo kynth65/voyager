@@ -77,10 +77,10 @@ export const refundService = {
    * Process a refund (approve/reject)
    */
   async processRefund(data: ProcessRefundRequest): Promise<Refund> {
-    const response = await apiClient.post<{ data: Refund }>(`/refunds/${data.refund_id}/process`, {
-      status: data.status,
-      notes: data.notes,
+    const response = await apiClient.post<{ refund: Refund }>(`/refunds/${data.refund_id}/process`, {
+      action: data.status,
+      admin_notes: data.notes,
     });
-    return response.data.data;
+    return response.data.refund;
   },
 };
