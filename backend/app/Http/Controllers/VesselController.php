@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Vessel;
+use App\Models\Booking;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -291,4 +292,5 @@ class VesselController extends Controller
             'end_date' => $endDate,
         ]);
     }
+
 }
