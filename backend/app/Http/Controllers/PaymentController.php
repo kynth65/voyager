@@ -4,11 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Models\Booking;
 use App\Models\Payment;
+use App\Services\EmailNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class PaymentController extends Controller
 {
+    protected $emailService;
+
+    public function __construct(EmailNotificationService $emailService)
+    {
+        $this->emailService = $emailService;
+    }
+
     /**
      * Display a listing of payments.
      * Admin/superadmin sees all, customer sees only their own.
@@ -168,6 +176,9 @@ class PaymentController extends Controller
         }
 
         $payment->load(['booking.user', 'booking.route', 'booking.vessel']);
+
+        // Send payment receipt email
+        $this->emailService->sendPaymentReceipt($payment);
 
         return response()->json([
             'message' => 'Payment processed successfully.',
