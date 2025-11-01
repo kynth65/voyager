@@ -1,11 +1,19 @@
 import { useAuth } from '../contexts/AuthContext';
 import { User, Mail, Phone, Shield, Calendar, Ship, BookOpen, Users, Route as RouteIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import Layout from '../components/layout/Layout';
 
 export default function DashboardPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  // Redirect admin and superadmin to their dashboard
+  useEffect(() => {
+    if (user && (user.role === 'admin' || user.role === 'superadmin')) {
+      navigate('/admin/dashboard', { replace: true });
+    }
+  }, [user, navigate]);
 
   const getRoleBadgeColor = (role: string) => {
     const colors: Record<string, string> = {
