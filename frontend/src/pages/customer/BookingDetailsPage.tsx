@@ -15,6 +15,7 @@ import {
   CreditCard,
   RefreshCw,
   FileText,
+  Download,
 } from 'lucide-react';
 import { bookingService } from '../../services/booking';
 import { refundService } from '../../services/payment';
@@ -30,6 +31,7 @@ export default function BookingDetailsPage() {
   const { user } = useAuth();
   const [showRefundModal, setShowRefundModal] = useState(false);
   const [refundReason, setRefundReason] = useState('');
+  const [isDownloadingTicket, setIsDownloadingTicket] = useState(false);
 
   const isAdmin = user?.role === 'admin' || user?.role === 'superadmin';
 
@@ -99,6 +101,31 @@ export default function BookingDetailsPage() {
         amount: booking.total_amount,
         reason: refundReason,
       });
+    }
+  };
+
+  const handleDownloadTicket = async () => {
+    if (!id) return;
+
+    setIsDownloadingTicket(true);
+    try {
+      const blob = await bookingService.downloadTicket(Number(id));
+
+      // Create a download link and trigger download
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Voyager-Ticket-${booking?.booking_reference || id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+
+      // Cleanup
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error: any) {
+      alert(error.response?.data?.message || 'Failed to download ticket. Please try again.');
+    } finally {
+      setIsDownloadingTicket(false);
     }
   };
 
@@ -432,6 +459,16 @@ export default function BookingDetailsPage() {
               <p>Booked on {formatDate(booking.created_at)}</p>
             </div>
             <div className="flex gap-3">
+              {(booking.status === 'confirmed' || booking.status === 'completed') && (
+                <button
+                  onClick={handleDownloadTicket}
+                  disabled={isDownloadingTicket}
+                  className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  <Download className="w-4 h-4" />
+                  {isDownloadingTicket ? 'Downloading...' : 'Download Ticket'}
+                </button>
+              )}
               {isAdmin && booking.status === 'pending' && (
                 <button
                   onClick={handleConfirm}
