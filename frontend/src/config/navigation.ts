@@ -80,6 +80,12 @@ export const navigationConfig: NavGroup[] = [
         href: '/my-bookings',
         roles: ['customer'],
       },
+      {
+        label: 'My Refunds',
+        icon: FileText,
+        href: '/my-refunds',
+        roles: ['customer'],
+      },
     ],
   },
   {
