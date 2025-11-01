@@ -1,7 +1,7 @@
 import type { User } from './user';
 import type { Vessel } from './vessel';
 import type { Route } from './route';
-import type { Payment } from './payment';
+import type { Payment, Refund } from './payment';
 
 export type BookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled';
 
@@ -34,6 +34,7 @@ export interface Booking {
   vessel?: Vessel;
   route?: Route;
   payment?: Payment;
+  refund?: Refund;
 }
 
 export interface CreateBookingRequest {
