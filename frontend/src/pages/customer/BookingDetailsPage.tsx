@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
@@ -12,9 +13,13 @@ import {
   ArrowLeft,
   MapPin,
   CreditCard,
+  RefreshCw,
+  FileText,
 } from 'lucide-react';
 import { bookingService } from '../../services/booking';
+import { refundService } from '../../services/payment';
 import type { BookingStatus } from '../../types/booking';
+import type { RefundStatus } from '../../types/payment';
 import Layout from '../../components/layout/Layout';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -23,6 +28,8 @@ export default function BookingDetailsPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const [showRefundModal, setShowRefundModal] = useState(false);
+  const [refundReason, setRefundReason] = useState('');
 
   const isAdmin = user?.role === 'admin' || user?.role === 'superadmin';
 
@@ -52,6 +59,23 @@ export default function BookingDetailsPage() {
     },
   });
 
+  // Request refund mutation
+  const requestRefundMutation = useMutation({
+    mutationFn: (data: { booking_id: number; amount: number; reason: string }) =>
+      refundService.createRefund(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['booking', id] });
+      queryClient.invalidateQueries({ queryKey: ['my-bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['refunds'] });
+      setShowRefundModal(false);
+      setRefundReason('');
+      alert('Refund request submitted successfully!');
+    },
+    onError: (error: any) => {
+      alert(error.response?.data?.message || 'Failed to submit refund request');
+    },
+  });
+
   const handleCancel = () => {
     if (window.confirm('Are you sure you want to cancel this booking?')) {
       cancelBookingMutation.mutate(Number(id));
@@ -62,6 +86,39 @@ export default function BookingDetailsPage() {
     if (window.confirm('Are you sure you want to confirm this booking?')) {
       confirmBookingMutation.mutate(Number(id));
     }
+  };
+
+  const handleRequestRefund = () => {
+    if (!refundReason.trim()) {
+      alert('Please provide a reason for the refund request');
+      return;
+    }
+    if (booking && booking.status === 'cancelled' && booking.payment) {
+      requestRefundMutation.mutate({
+        booking_id: booking.id,
+        amount: booking.total_amount,
+        reason: refundReason,
+      });
+    }
+  };
+
+  const getRefundStatusBadge = (status: RefundStatus) => {
+    const badges = {
+      pending: { bg: 'bg-yellow-100', text: 'text-yellow-800', icon: Clock, label: 'Pending Review' },
+      approved: { bg: 'bg-blue-100', text: 'text-blue-800', icon: CheckCircle, label: 'Approved' },
+      rejected: { bg: 'bg-red-100', text: 'text-red-800', icon: XCircle, label: 'Rejected' },
+      processed: { bg: 'bg-green-100', text: 'text-green-800', icon: CheckCircle, label: 'Refund Processed' },
+    };
+
+    const badge = badges[status];
+    const Icon = badge.icon;
+
+    return (
+      <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${badge.bg} ${badge.text}`}>
+        <Icon className="w-5 h-5" />
+        {badge.label}
+      </span>
+    );
   };
 
   const getStatusBadge = (status: BookingStatus) => {
@@ -282,6 +339,92 @@ export default function BookingDetailsPage() {
           </div>
         )}
 
+        {/* Refund Information */}
+        {booking.refund && (
+          <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <RefreshCw className="w-5 h-5 text-gray-600" />
+              Refund Information
+            </h2>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Refund Status</p>
+                  <div className="mt-2">
+                    {getRefundStatusBadge(booking.refund.status)}
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm text-gray-600">Refund Amount</p>
+                  <p className="text-2xl font-bold text-blue-600">${booking.refund.amount}</p>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-gray-200">
+                <p className="text-sm font-medium text-gray-700 mb-1">Reason:</p>
+                <p className="text-sm text-gray-600">{booking.refund.reason}</p>
+              </div>
+
+              {booking.refund.admin_notes && (
+                <div className="pt-4 border-t border-gray-200">
+                  <p className="text-sm font-medium text-gray-700 mb-1">Admin Notes:</p>
+                  <p className="text-sm text-gray-600">{booking.refund.admin_notes}</p>
+                </div>
+              )}
+
+              <div className="pt-4 border-t border-gray-200 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-gray-600">Requested Date</p>
+                  <p className="text-sm font-medium text-gray-900">
+                    {formatDate(booking.refund.created_at)}
+                  </p>
+                </div>
+                {booking.refund.processed_at && (
+                  <div>
+                    <p className="text-sm text-gray-600">Processed Date</p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {formatDate(booking.refund.processed_at)}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {booking.refund.status === 'processed' && (
+                <div className="mt-4 p-4 bg-green-50 rounded-md border border-green-200">
+                  <div className="flex items-center gap-2 text-green-800">
+                    <CheckCircle className="w-5 h-5" />
+                    <p className="text-sm font-medium">
+                      Your refund has been processed and will be credited to your account within 5-7 business days.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {booking.refund.status === 'approved' && (
+                <div className="mt-4 p-4 bg-blue-50 rounded-md border border-blue-200">
+                  <div className="flex items-center gap-2 text-blue-800">
+                    <CheckCircle className="w-5 h-5" />
+                    <p className="text-sm font-medium">
+                      Your refund request has been approved and is being processed.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {booking.refund.status === 'rejected' && (
+                <div className="mt-4 p-4 bg-red-50 rounded-md border border-red-200">
+                  <div className="flex items-center gap-2 text-red-800">
+                    <XCircle className="w-5 h-5" />
+                    <p className="text-sm font-medium">
+                      Your refund request has been rejected. Please contact support for more information.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Actions */}
         <div className="bg-white rounded-lg shadow-lg p-6">
           <div className="flex items-center justify-between">
@@ -305,6 +448,15 @@ export default function BookingDetailsPage() {
                   className="px-6 py-3 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {cancelBookingMutation.isPending ? 'Cancelling...' : 'Cancel Booking'}
+                </button>
+              )}
+              {booking.status === 'cancelled' && !booking.refund && booking.payment && (
+                <button
+                  onClick={() => setShowRefundModal(true)}
+                  className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center gap-2"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  Request Refund
                 </button>
               )}
             </div>
@@ -340,6 +492,69 @@ export default function BookingDetailsPage() {
             </div>
           )}
         </div>
+
+        {/* Refund Request Modal */}
+        {showRefundModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-blue-600" />
+                  Request Refund
+                </h3>
+                <button
+                  onClick={() => setShowRefundModal(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                  disabled={requestRefundMutation.isPending}
+                >
+                  <XCircle className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="mb-4">
+                <p className="text-sm text-gray-600 mb-2">
+                  You are requesting a refund for this cancelled booking.
+                </p>
+                <div className="bg-blue-50 p-3 rounded-md mb-4">
+                  <p className="text-sm font-medium text-blue-900">
+                    Refund Amount: ${booking.total_amount}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Reason for Refund <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  value={refundReason}
+                  onChange={(e) => setRefundReason(e.target.value)}
+                  placeholder="Please provide a reason for your refund request..."
+                  rows={4}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  disabled={requestRefundMutation.isPending}
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowRefundModal(false)}
+                  disabled={requestRefundMutation.isPending}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleRequestRefund}
+                  disabled={requestRefundMutation.isPending || !refundReason.trim()}
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {requestRefundMutation.isPending ? 'Submitting...' : 'Submit Request'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </Layout>
   );
