@@ -23,11 +23,13 @@ import PaymentsPage from './pages/admin/PaymentsPage';
 import RefundsPage from './pages/admin/RefundsPage';
 import AnalyticsPage from './pages/admin/AnalyticsPage';
 import AccountingPage from './pages/admin/AccountingPage';
+import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 // Customer pages
 import LandingPage from './pages/LandingPage';
 import BrowseRoutesPage from './pages/customer/BrowseRoutesPage';
 import BookingPage from './pages/customer/BookingPage';
 import MyBookingsPage from './pages/customer/MyBookingsPage';
+import MyRefundsPage from './pages/customer/MyRefundsPage';
 import BookingDetailsPage from './pages/customer/BookingDetailsPage';
 
 const queryClient = new QueryClient({
@@ -192,6 +194,14 @@ function AppRoutes() {
         }
       />
       <Route
+        path="/my-refunds"
+        element={
+          <ProtectedRoute>
+            <MyRefundsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/bookings/:id"
         element={
           <ProtectedRoute>
@@ -274,6 +284,16 @@ function AppRoutes() {
         element={
           <RoleBasedRoute allowedRoles={['superadmin']}>
             <RouteFormPage />
+          </RoleBasedRoute>
+        }
+      />
+
+      {/* Admin Dashboard (superadmin and admin) */}
+      <Route
+        path="/admin/dashboard"
+        element={
+          <RoleBasedRoute allowedRoles={['superadmin', 'admin']}>
+            <AdminDashboardPage />
           </RoleBasedRoute>
         }
       />
