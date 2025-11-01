@@ -14,6 +14,7 @@ use App\Http\Controllers\RouteController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\DashboardController;
 
 // Public routes
 Route::post('/register', [AuthController::class, 'register']);
@@ -90,6 +91,16 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('customers', [CustomerController::class, 'index']);
         Route::get('customers/{id}', [CustomerController::class, 'show']);
         Route::get('customers/{id}/bookings', [CustomerController::class, 'bookings']);
+    });
+
+    // Dashboard (admin and superadmin only)
+    Route::middleware('role:superadmin,admin')->group(function () {
+        Route::get('dashboard/stats', [DashboardController::class, 'getDashboardStats']);
+        Route::get('dashboard/bookings/recent', [DashboardController::class, 'getRecentBookings']);
+        Route::get('dashboard/bookings/by-type', [DashboardController::class, 'getBookingsByType']);
+        Route::get('dashboard/revenue', [DashboardController::class, 'getRevenueStats']);
+        Route::get('dashboard/routes/popular', [DashboardController::class, 'getPopularRoutes']);
+        Route::get('dashboard/bookings/trends', [DashboardController::class, 'getBookingTrends']);
     });
 
     // Suppliers (superadmin and admin can manage)
