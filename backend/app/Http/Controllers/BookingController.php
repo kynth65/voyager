@@ -7,9 +7,11 @@ use App\Models\Payment;
 use App\Models\Route;
 use App\Models\Vessel;
 use App\Services\EmailNotificationService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class BookingController extends Controller
 {
@@ -273,6 +275,61 @@ class BookingController extends Controller
             'message' => 'Booking confirmed successfully.',
             'booking' => $booking,
         ]);
+    }
+
+    /**
+     * Download booking ticket as PDF.
+     */
+    public function downloadTicket(Request $request, Booking $booking)
+    {
+        // Check authorization - customer can only download their own tickets
+        if ($request->user()->role === 'customer' && $booking->user_id !== $request->user()->id) {
+            return response()->json([
+                'message' => 'Unauthorized to download this ticket.'
+            ], 403);
+        }
+
+        // Only confirmed bookings can have tickets
+        if (!$booking->isConfirmed()) {
+            return response()->json([
+                'message' => 'Ticket can only be downloaded for confirmed bookings.'
+            ], 422);
+        }
+
+        // Load all necessary relationships
+        $booking->load(['user', 'vessel', 'route', 'payment']);
+
+        // Generate QR code data with booking verification info
+        $qrCodeData = json_encode([
+            'type' => 'VOYAGER_FERRY_TICKET',
+            'booking_reference' => $booking->booking_reference,
+            'booking_id' => $booking->id,
+            'passenger_count' => $booking->passengers,
+            'departure_date' => $booking->booking_date->format('Y-m-d'),
+            'departure_time' => $booking->departure_time,
+            'route' => $booking->route->origin . ' → ' . $booking->route->destination,
+            'vessel' => $booking->vessel->name,
+        ]);
+
+        // Generate QR code as SVG (compact size for single-page vertical PDF)
+        $qrCode = QrCode::format('svg')
+            ->size(127)
+            ->errorCorrection('H')
+            ->generate($qrCodeData);
+
+        // Generate PDF
+        $pdf = Pdf::loadView('tickets.ferry-ticket', [
+            'booking' => $booking,
+            'qrCode' => $qrCode,
+        ]);
+
+        // Set paper size and orientation
+        $pdf->setPaper('a4', 'portrait');
+
+        // Download the PDF with a filename
+        $filename = 'Voyager-Ticket-' . $booking->booking_reference . '.pdf';
+
+        return $pdf->download($filename);
     }
 
     /**

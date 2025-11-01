@@ -15,6 +15,7 @@ use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ReportController;
 
 // Public routes
 Route::post('/register', [AuthController::class, 'register']);
@@ -76,6 +77,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('bookings', BookingController::class);
     Route::post('bookings/{booking}/confirm', [BookingController::class, 'confirm']);
     Route::post('bookings/{booking}/cancel', [BookingController::class, 'cancel']);
+    Route::get('bookings/{booking}/ticket', [BookingController::class, 'downloadTicket']);
     Route::get('vessels/{vessel}/capacity', [BookingController::class, 'getCapacity']);
 
     // Payments
@@ -101,6 +103,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('dashboard/revenue', [DashboardController::class, 'getRevenueStats']);
         Route::get('dashboard/routes/popular', [DashboardController::class, 'getPopularRoutes']);
         Route::get('dashboard/bookings/trends', [DashboardController::class, 'getBookingTrends']);
+    });
+
+    // Reports & Export (admin and superadmin only)
+    Route::middleware('role:superadmin,admin')->group(function () {
+        Route::get('reports/bookings/export', [ReportController::class, 'exportBookingsCSV']);
+        Route::get('reports/revenue', [ReportController::class, 'generateRevenueReport']);
+        Route::get('reports/routes/popular', [ReportController::class, 'generatePopularRoutesReport']);
     });
 
     // Suppliers (superadmin and admin can manage)
