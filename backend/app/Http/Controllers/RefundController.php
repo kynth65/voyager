@@ -4,10 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\Refund;
 use App\Models\Booking;
+use App\Services\EmailNotificationService;
 use Illuminate\Http\Request;
 
 class RefundController extends Controller
 {
+    protected EmailNotificationService $emailService;
+
+    public function __construct(EmailNotificationService $emailService)
+    {
+        $this->emailService = $emailService;
+    }
     /**
      * Display a listing of refunds.
      * Admin/superadmin sees all, customer sees only their own.
@@ -158,6 +165,9 @@ class RefundController extends Controller
                 }
                 $refund->approve($request->user()->id);
                 $message = 'Refund approved successfully.';
+
+                // Send approval email to customer
+                $this->emailService->sendRefundApproved($refund);
                 break;
 
             case 'reject':
@@ -168,6 +178,9 @@ class RefundController extends Controller
                 }
                 $refund->reject($request->user()->id, $adminNotes);
                 $message = 'Refund rejected successfully.';
+
+                // Send rejection email to customer
+                $this->emailService->sendRefundRejected($refund);
                 break;
 
             case 'process':
@@ -182,6 +195,9 @@ class RefundController extends Controller
                 }
                 $refund->process($request->user()->id);
                 $message = 'Refund processed successfully.';
+
+                // Send processed email to customer
+                $this->emailService->sendRefundProcessed($refund);
                 break;
 
             default:
