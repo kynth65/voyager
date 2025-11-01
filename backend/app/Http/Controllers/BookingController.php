@@ -6,12 +6,20 @@ use App\Models\Booking;
 use App\Models\Payment;
 use App\Models\Route;
 use App\Models\Vessel;
+use App\Services\EmailNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class BookingController extends Controller
 {
+    protected $emailService;
+
+    public function __construct(EmailNotificationService $emailService)
+    {
+        $this->emailService = $emailService;
+    }
+
     /**
      * Display a listing of bookings.
      * Admin sees all, customer sees only their own.
@@ -157,6 +165,9 @@ class BookingController extends Controller
             // Load relationships for response
             $booking->load(['user', 'vessel', 'route', 'payment']);
 
+            // Send confirmation email
+            $this->emailService->sendBookingConfirmation($booking);
+
             return response()->json([
                 'message' => 'Booking created successfully!',
                 'booking' => $booking,
@@ -217,6 +228,9 @@ class BookingController extends Controller
         $booking->cancel();
         $booking->load(['user', 'vessel', 'route', 'payment']);
 
+        // Send cancellation email
+        $this->emailService->sendBookingCancellation($booking);
+
         return response()->json([
             'message' => 'Booking cancelled successfully.',
             'booking' => $booking,
@@ -251,6 +265,9 @@ class BookingController extends Controller
 
         $booking->confirm();
         $booking->load(['user', 'vessel', 'route', 'payment']);
+
+        // Send confirmation email
+        $this->emailService->sendBookingConfirmation($booking);
 
         return response()->json([
             'message' => 'Booking confirmed successfully.',
