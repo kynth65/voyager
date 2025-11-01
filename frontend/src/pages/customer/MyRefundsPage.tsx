@@ -12,7 +12,6 @@ import {
   Eye,
   ChevronLeft,
   ChevronRight,
-  Filter,
 } from 'lucide-react';
 import { refundService } from '../../services/payment';
 import type { Refund, RefundStatus } from '../../types/payment';
@@ -22,7 +21,6 @@ export default function MyRefundsPage() {
   const navigate = useNavigate();
   const [statusFilter, setStatusFilter] = useState<RefundStatus | ''>('');
   const [page, setPage] = useState(1);
-  const [showFilters, setShowFilters] = useState(false);
 
   // Fetch customer's refunds
   const { data, isLoading, error } = useQuery({

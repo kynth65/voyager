@@ -6,7 +6,6 @@ import {
   TrendingUp,
   Calendar,
   DollarSign,
-  MapPin,
   Users,
   BarChart3,
   FileDown,
