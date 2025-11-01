@@ -24,6 +24,7 @@ import RefundsPage from './pages/admin/RefundsPage';
 import AnalyticsPage from './pages/admin/AnalyticsPage';
 import AccountingPage from './pages/admin/AccountingPage';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
+import ReportsPage from './pages/admin/ReportsPage';
 // Customer pages
 import LandingPage from './pages/LandingPage';
 import BrowseRoutesPage from './pages/customer/BrowseRoutesPage';
@@ -370,6 +371,16 @@ function AppRoutes() {
         element={
           <RoleBasedRoute allowedRoles={['superadmin', 'admin']}>
             <AccountingPage />
+          </RoleBasedRoute>
+        }
+      />
+
+      {/* Reports (superadmin and admin) */}
+      <Route
+        path="/admin/reports"
+        element={
+          <RoleBasedRoute allowedRoles={['superadmin', 'admin']}>
+            <ReportsPage />
           </RoleBasedRoute>
         }
       />

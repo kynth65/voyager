@@ -3,7 +3,6 @@ import {
   Users,
   Ship,
   Route as RouteIcon,
-  Calendar,
   CreditCard,
   FileText,
   BarChart3,
@@ -12,6 +11,7 @@ import {
   Home,
   BookOpen,
   DollarSign,
+  FileDown,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -94,7 +94,7 @@ export const navigationConfig: NavGroup[] = [
     items: [
       {
         label: 'All Bookings',
-        icon: Calendar,
+        icon: BookOpen,
         href: '/admin/bookings',
         roles: ['superadmin', 'admin'],
       },
@@ -138,6 +138,12 @@ export const navigationConfig: NavGroup[] = [
         label: 'Analytics',
         icon: BarChart3,
         href: '/admin/analytics',
+        roles: ['superadmin', 'admin'],
+      },
+      {
+        label: 'Reports & Export',
+        icon: FileDown,
+        href: '/admin/reports',
         roles: ['superadmin', 'admin'],
       },
     ],
