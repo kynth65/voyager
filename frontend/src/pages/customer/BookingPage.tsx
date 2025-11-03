@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -14,10 +14,12 @@ import {
   AlertCircle,
   CheckCircle,
   ArrowLeft,
+  UserPlus,
 } from 'lucide-react';
 import { routeService } from '../../services/route';
 import { bookingService } from '../../services/booking';
 import type { CreateBookingRequest } from '../../types/booking';
+import { useAuth } from '../../contexts/AuthContext';
 
 // Booking form validation schema
 const bookingSchema = z.object({
@@ -33,8 +35,11 @@ type BookingFormData = z.infer<typeof bookingSchema>;
 export default function BookingPage() {
   const { routeId } = useParams<{ routeId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { isAuthenticated } = useAuth();
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const [bookingReference, setBookingReference] = useState('');
+  const [showGuestModal, setShowGuestModal] = useState(false);
 
   // Fetch route details
   const { data: route, isLoading: routeLoading, error: routeError } = useQuery({
@@ -81,6 +86,26 @@ export default function BookingPage() {
       payment_method: data.payment_method,
     };
 
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      // Store booking data in localStorage for later
+      localStorage.setItem('pending_booking', JSON.stringify({
+        ...bookingData,
+        route: {
+          id: route.id,
+          origin: route.origin,
+          destination: route.destination,
+          price: route.price,
+          duration: route.duration,
+          vessel_name: route.vessel?.name || 'Ferry',
+        }
+      }));
+      // Show modal to prompt user to register
+      setShowGuestModal(true);
+      return;
+    }
+
+    // User is authenticated, proceed with booking
     createBookingMutation.mutate(bookingData);
   };
 
@@ -349,6 +374,56 @@ export default function BookingPage() {
           </div>
         </div>
       </div>
+
+      {/* Guest Modal - Prompt to create account */}
+      {showGuestModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 animate-fade-in">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <UserPlus className="w-8 h-8 text-blue-600" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Create an Account to Continue
+              </h2>
+              <p className="text-gray-600">
+                To complete your booking, please create a free account. Your booking details have been saved and will be ready after registration.
+              </p>
+            </div>
+
+            <div className="bg-blue-50 rounded-lg p-4 mb-6">
+              <h3 className="font-semibold text-blue-900 mb-2">Your Booking Details:</h3>
+              <div className="space-y-1 text-sm text-blue-800">
+                <p>• Route: {route?.origin} → {route?.destination}</p>
+                <p>• Passengers: {passengers}</p>
+                <p>• Total: ${totalAmount.toFixed(2)}</p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={() => navigate('/register')}
+                className="w-full py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+              >
+                <UserPlus className="w-5 h-5" />
+                Create Account & Continue
+              </button>
+              <button
+                onClick={() => navigate('/login')}
+                className="w-full py-3 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition-colors"
+              >
+                I Already Have an Account
+              </button>
+              <button
+                onClick={() => setShowGuestModal(false)}
+                className="w-full py-2 text-gray-600 hover:text-gray-900 transition-colors text-sm"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

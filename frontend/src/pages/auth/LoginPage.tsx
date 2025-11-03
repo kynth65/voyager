@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth } from '../../contexts/AuthContext';
-import { LogIn, Mail, Lock, AlertCircle, Plane, CheckCircle } from 'lucide-react';
+import { LogIn, Mail, Lock, AlertCircle, Plane, CheckCircle, Ship } from 'lucide-react';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -20,11 +20,22 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [pendingBooking, setPendingBooking] = useState<any>(null);
 
-  // Check for password reset success message
+  // Check for password reset success message and pending booking
   useEffect(() => {
     if (searchParams.get('reset') === 'success') {
       setSuccessMessage('Your password has been reset successfully! You can now sign in with your new password.');
+    }
+
+    // Check for pending booking
+    const storedBooking = localStorage.getItem('pending_booking');
+    if (storedBooking) {
+      try {
+        setPendingBooking(JSON.parse(storedBooking));
+      } catch (e) {
+        console.error('Failed to parse pending booking:', e);
+      }
     }
   }, [searchParams]);
 
@@ -42,7 +53,15 @@ export default function LoginPage() {
 
     try {
       await login(data);
-      navigate('/dashboard');
+
+      // Check if there's a pending booking
+      if (pendingBooking) {
+        // Redirect to booking confirmation page instead of dashboard
+        navigate('/confirm-booking');
+      } else {
+        // Normal login flow
+        navigate('/dashboard');
+      }
     } catch (err: any) {
       setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
     } finally {
@@ -68,6 +87,19 @@ export default function LoginPage() {
 
         {/* Form Card */}
         <div className="mt-8 bg-white py-8 px-6 shadow-xl rounded-2xl border border-gray-100">
+          {/* Pending Booking Notice */}
+          {pendingBooking && (
+            <div className="rounded-lg bg-blue-50 border border-blue-200 p-4 mb-6 flex items-start space-x-3">
+              <Ship className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-blue-900 mb-1">Booking in Progress</p>
+                <p className="text-sm text-blue-800">
+                  Sign in to complete your ferry booking from {pendingBooking.route?.origin} to {pendingBooking.route?.destination}.
+                </p>
+              </div>
+            </div>
+          )}
+
           <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
             {/* Success Alert */}
             {successMessage && (

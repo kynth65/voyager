@@ -29,6 +29,7 @@ import ReportsPage from './pages/admin/ReportsPage';
 import LandingPage from './pages/LandingPage';
 import BrowseRoutesPage from './pages/customer/BrowseRoutesPage';
 import BookingPage from './pages/customer/BookingPage';
+import BookingConfirmationPage from './pages/customer/BookingConfirmationPage';
 import MyBookingsPage from './pages/customer/MyBookingsPage';
 import MyRefundsPage from './pages/customer/MyRefundsPage';
 import BookingDetailsPage from './pages/customer/BookingDetailsPage';
@@ -178,11 +179,15 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+      {/* Public booking page - accessible without login */}
+      <Route path="/booking/:routeId" element={<BookingPage />} />
+
+      {/* Booking confirmation page - requires authentication */}
       <Route
-        path="/booking/:routeId"
+        path="/confirm-booking"
         element={
           <ProtectedRoute>
-            <BookingPage />
+            <BookingConfirmationPage />
           </ProtectedRoute>
         }
       />
