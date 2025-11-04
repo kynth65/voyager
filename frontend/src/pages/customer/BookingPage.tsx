@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -35,7 +35,6 @@ type BookingFormData = z.infer<typeof bookingSchema>;
 export default function BookingPage() {
   const { routeId } = useParams<{ routeId: string }>();
   const navigate = useNavigate();
-  const location = useLocation();
   const { isAuthenticated } = useAuth();
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const [bookingReference, setBookingReference] = useState('');
