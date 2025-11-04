@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useMutation } from '@tantml:invoke name="@tanstack/react-query">
+import { useMutation } from '@tanstack/react-query';
 import {
   Ship,
   MapPin,
