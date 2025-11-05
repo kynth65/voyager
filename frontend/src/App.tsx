@@ -170,15 +170,9 @@ function AppRoutes() {
         }
       />
 
-      {/* Customer routes */}
-      <Route
-        path="/browse-routes"
-        element={
-          <ProtectedRoute>
-            <BrowseRoutesPage />
-          </ProtectedRoute>
-        }
-      />
+      {/* Customer routes - public route browsing */}
+      <Route path="/browse-routes" element={<BrowseRoutesPage />} />
+
       {/* Public booking page - accessible without login */}
       <Route path="/booking/:routeId" element={<BookingPage />} />
 
