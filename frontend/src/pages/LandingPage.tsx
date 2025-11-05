@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import {
@@ -25,22 +25,13 @@ import {
 } from "lucide-react";
 import { routeService } from "../services/route";
 import type { Route } from "../types/route";
+import Navbar from "../components/common/Navbar";
 
 export default function LandingPage() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedOrigin, setSelectedOrigin] = useState("");
   const [selectedDestination, setSelectedDestination] = useState("");
-  const [isScrolled, setIsScrolled] = useState(false);
-
-  // Handle scroll effect for navbar
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   // Fetch all routes
   const { data, isLoading, error } = useQuery({
@@ -112,79 +103,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Sticky Navigation Bar */}
-      <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isScrolled ? "bg-white shadow-md py-4" : "bg-transparent py-6"
-        }`}
-      >
-        <div className="w-full px-6 sm:px-8 lg:px-12">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-3 group cursor-pointer">
-              <div
-                className={`p-2 rounded-xl transition-colors`}
-                style={{
-                  background: isScrolled ? "#272343" : "#ffffff",
-                }}
-              >
-                <Ship
-                  className={`w-6 h-6`}
-                  style={{
-                    color: isScrolled ? "#ffffff" : "#272343",
-                  }}
-                />
-              </div>
-              <span
-                className={`text-2xl font-bold transition-colors`}
-                style={{
-                  color: isScrolled ? "#272343" : "#ffffff",
-                }}
-              >
-                Voyager
-              </span>
-            </div>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => navigate("/login")}
-                className={`px-6 py-2.5 rounded-lg font-medium transition-all duration-200`}
-                style={isScrolled ? {} : { color: "#ffffff" }}
-                onMouseEnter={(e) => {
-                  if (!isScrolled) {
-                    e.currentTarget.style.background =
-                      "rgba(255, 255, 255, 0.2)";
-                  } else {
-                    e.currentTarget.style.background = "#e3f6f5";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "transparent";
-                }}
-              >
-                Login
-              </button>
-              <button
-                onClick={() => navigate("/register")}
-                className="px-6 py-2.5 text-white rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5"
-                style={{
-                  background: "#272343",
-                  boxShadow: "0 10px 15px -3px rgba(39, 35, 67, 0.3)",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = "#1a1829";
-                  e.currentTarget.style.boxShadow =
-                    "0 20px 25px -5px rgba(39, 35, 67, 0.4)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "#272343";
-                  e.currentTarget.style.boxShadow =
-                    "0 10px 15px -3px rgba(39, 35, 67, 0.3)";
-                }}
-              >
-                Sign Up
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Navbar transparent={true} showAuthButtons={true} />
 
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-between overflow-hidden">
@@ -261,16 +180,6 @@ export default function LandingPage() {
             </div>
           </div>
         </div>
-
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-          <div
-            className="w-6 h-10 border-2 rounded-full flex items-start justify-center p-2"
-            style={{ borderColor: "#ffffff" }}
-          >
-            <div className="w-1.5 h-1.5 rounded-full bg-white"></div>
-          </div>
-        </div>
       </section>
 
       {/* Features Section - Minimalist Redesign */}
@@ -302,26 +211,22 @@ export default function LandingPage() {
               {
                 icon: Shield,
                 title: "Secure Payments",
-                description:
-                  "Protected with bank-level encryption",
+                description: "Protected with bank-level encryption",
               },
               {
                 icon: Calendar,
                 title: "Flexible Scheduling",
-                description:
-                  "Multiple daily departures that fit your schedule",
+                description: "Multiple daily departures that fit your schedule",
               },
               {
                 icon: CreditCard,
                 title: "Easy Refunds",
-                description:
-                  "Hassle-free cancellation and modification",
+                description: "Hassle-free cancellation and modification",
               },
               {
                 icon: Heart,
                 title: "Best Price Guarantee",
-                description:
-                  "Most competitive rates on all ferry routes",
+                description: "Most competitive rates on all ferry routes",
               },
               {
                 icon: Award,
@@ -329,17 +234,17 @@ export default function LandingPage() {
                 description: "Dedicated team always ready to help",
               },
             ].map((feature, index) => (
-              <div
-                key={index}
-                className="group"
-              >
+              <div key={index} className="group">
                 <div
                   className="w-12 h-12 rounded-full flex items-center justify-center mb-6 transition-transform duration-500 group-hover:scale-110"
                   style={{
                     background: "#e3f6f5",
                   }}
                 >
-                  <feature.icon className="w-5 h-5" style={{ color: "#272343" }} />
+                  <feature.icon
+                    className="w-5 h-5"
+                    style={{ color: "#272343" }}
+                  />
                 </div>
                 <h3
                   className="text-xl font-medium mb-3"
@@ -369,7 +274,10 @@ export default function LandingPage() {
             >
               Book in 3 Simple Steps
             </h2>
-            <p className="text-lg font-light" style={{ color: "#272343", opacity: 0.6 }}>
+            <p
+              className="text-lg font-light"
+              style={{ color: "#272343", opacity: 0.6 }}
+            >
               Getting on board has never been easier
             </p>
           </div>
@@ -434,10 +342,7 @@ export default function LandingPage() {
       </section>
 
       {/* Search and Routes Section - Minimalist Redesign */}
-      <section
-        id="search-routes"
-        className="py-32 bg-white"
-      >
+      <section id="search-routes" className="py-32 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Search Box */}
           <div
@@ -445,7 +350,7 @@ export default function LandingPage() {
             style={{
               borderWidth: "1px",
               borderColor: "#bae8e8",
-              boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.1)"
+              boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.1)",
             }}
           >
             <div className="text-center mb-10">
@@ -455,7 +360,10 @@ export default function LandingPage() {
               >
                 Find Your Perfect Route
               </h2>
-              <p className="font-light" style={{ color: "#272343", opacity: 0.6 }}>
+              <p
+                className="font-light"
+                style={{ color: "#272343", opacity: 0.6 }}
+              >
                 Search from {routes.length} available routes
               </p>
             </div>
@@ -585,7 +493,10 @@ export default function LandingPage() {
             <div className="flex items-center justify-between mb-12">
               <h3 className="text-3xl font-light" style={{ color: "#272343" }}>
                 Available Routes
-                <span className="ml-3 font-light" style={{ color: "#272343", opacity: 0.4 }}>
+                <span
+                  className="ml-3 font-light"
+                  style={{ color: "#272343", opacity: 0.4 }}
+                >
                   ({filteredRoutes.length})
                 </span>
               </h3>
@@ -615,7 +526,10 @@ export default function LandingPage() {
                 >
                   No routes found
                 </p>
-                <p className="font-light" style={{ color: "#272343", opacity: 0.6 }}>
+                <p
+                  className="font-light"
+                  style={{ color: "#272343", opacity: 0.6 }}
+                >
                   Try adjusting your search filters
                 </p>
               </div>
@@ -628,7 +542,7 @@ export default function LandingPage() {
                     style={{
                       borderWidth: "1px",
                       borderColor: "#bae8e8",
-                      boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.1)"
+                      boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.1)",
                     }}
                   >
                     {/* Vessel Image */}
@@ -646,7 +560,10 @@ export default function LandingPage() {
                         />
                       ) : (
                         <div className="flex items-center justify-center h-full">
-                          <Ship className="w-16 h-16" style={{ color: "#272343", opacity: 0.2 }} />
+                          <Ship
+                            className="w-16 h-16"
+                            style={{ color: "#272343", opacity: 0.2 }}
+                          />
                         </div>
                       )}
                       <div className="absolute top-4 right-4 bg-white px-4 py-2 rounded-full">
@@ -714,7 +631,11 @@ export default function LandingPage() {
                         {/* Duration */}
                         <div
                           className="flex items-center gap-3 font-light"
-                          style={{ color: "#272343", opacity: 0.6, fontSize: "15px" }}
+                          style={{
+                            color: "#272343",
+                            opacity: 0.6,
+                            fontSize: "15px",
+                          }}
                         >
                           <Clock className="w-4 h-4" style={{ opacity: 0.6 }} />
                           <span>{route.duration} minutes</span>
@@ -724,7 +645,11 @@ export default function LandingPage() {
                         {route.vessel?.capacity && (
                           <div
                             className="flex items-center gap-3 font-light"
-                            style={{ color: "#272343", opacity: 0.6, fontSize: "15px" }}
+                            style={{
+                              color: "#272343",
+                              opacity: 0.6,
+                              fontSize: "15px",
+                            }}
                           >
                             <Users
                               className="w-4 h-4"
@@ -773,10 +698,16 @@ export default function LandingPage() {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-20">
-            <h2 className="text-5xl font-light mb-6" style={{ color: "#272343", letterSpacing: "-0.02em" }}>
+            <h2
+              className="text-5xl font-light mb-6"
+              style={{ color: "#272343", letterSpacing: "-0.02em" }}
+            >
               Trusted by Thousands
             </h2>
-            <p className="text-lg font-light" style={{ color: "#272343", opacity: 0.6 }}>
+            <p
+              className="text-lg font-light"
+              style={{ color: "#272343", opacity: 0.6 }}
+            >
               Join our growing community of satisfied customers
             </p>
           </div>
@@ -810,12 +741,23 @@ export default function LandingPage() {
                   borderColor: "#bae8e8",
                 }}
               >
-                <p className="text-lg mb-8 leading-relaxed font-light" style={{ color: "#272343", opacity: 0.8 }}>
+                <p
+                  className="text-lg mb-8 leading-relaxed font-light"
+                  style={{ color: "#272343", opacity: 0.8 }}
+                >
                   "{testimonial.quote}"
                 </p>
                 <div>
-                  <div className="font-medium mb-1" style={{ color: "#272343" }}>{testimonial.author}</div>
-                  <div className="text-sm font-light" style={{ color: "#272343", opacity: 0.5 }}>
+                  <div
+                    className="font-medium mb-1"
+                    style={{ color: "#272343" }}
+                  >
+                    {testimonial.author}
+                  </div>
+                  <div
+                    className="text-sm font-light"
+                    style={{ color: "#272343", opacity: 0.5 }}
+                  >
                     {testimonial.role}
                   </div>
                 </div>
@@ -825,14 +767,18 @@ export default function LandingPage() {
 
           {/* CTA */}
           <div className="text-center max-w-3xl mx-auto">
-            <h3 className="text-4xl font-light mb-6" style={{ color: "#272343", letterSpacing: "-0.02em" }}>
+            <h3
+              className="text-4xl font-light mb-6"
+              style={{ color: "#272343", letterSpacing: "-0.02em" }}
+            >
               Ready to Start Your Journey?
             </h3>
             <p
               className="text-lg mb-10 font-light"
               style={{ color: "#272343", opacity: 0.6 }}
             >
-              Join thousands of travelers who trust Voyager for their ferry bookings
+              Join thousands of travelers who trust Voyager for their ferry
+              bookings
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <button
@@ -910,13 +856,18 @@ export default function LandingPage() {
                       background: "rgba(255, 255, 255, 0.05)",
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.background = "rgba(255, 255, 255, 0.1)";
+                      e.currentTarget.style.background =
+                        "rgba(255, 255, 255, 0.1)";
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)";
+                      e.currentTarget.style.background =
+                        "rgba(255, 255, 255, 0.05)";
                     }}
                   >
-                    <Icon className="w-4 h-4" style={{ color: "#ffffff", opacity: 0.7 }} />
+                    <Icon
+                      className="w-4 h-4"
+                      style={{ color: "#ffffff", opacity: 0.7 }}
+                    />
                   </a>
                 ))}
               </div>
@@ -932,7 +883,11 @@ export default function LandingPage() {
                       <a
                         href="#"
                         className="transition-opacity font-light"
-                        style={{ color: "#ffffff", opacity: 0.5, fontSize: "15px" }}
+                        style={{
+                          color: "#ffffff",
+                          opacity: 0.5,
+                          fontSize: "15px",
+                        }}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.opacity = "1";
                         }}
@@ -963,7 +918,11 @@ export default function LandingPage() {
                     <a
                       href="#"
                       className="transition-opacity font-light"
-                      style={{ color: "#ffffff", opacity: 0.5, fontSize: "15px" }}
+                      style={{
+                        color: "#ffffff",
+                        opacity: 0.5,
+                        fontSize: "15px",
+                      }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.opacity = "1";
                       }}
@@ -980,9 +939,7 @@ export default function LandingPage() {
 
             {/* Contact */}
             <div>
-              <h3 className="text-white font-medium mb-6">
-                Get In Touch
-              </h3>
+              <h3 className="text-white font-medium mb-6">Get In Touch</h3>
               <ul className="space-y-4">
                 <li>
                   <a
@@ -1021,9 +978,15 @@ export default function LandingPage() {
           </div>
 
           {/* Bottom Bar */}
-          <div className="pt-8" style={{ borderTop: "1px solid rgba(255, 255, 255, 0.1)" }}>
+          <div
+            className="pt-8"
+            style={{ borderTop: "1px solid rgba(255, 255, 255, 0.1)" }}
+          >
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <p className="text-sm font-light" style={{ color: "#ffffff", opacity: 0.4 }}>
+              <p
+                className="text-sm font-light"
+                style={{ color: "#ffffff", opacity: 0.4 }}
+              >
                 © 2024 Voyager Ferry Booking. All rights reserved.
               </p>
               <div className="flex gap-6 text-sm font-light">
