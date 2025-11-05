@@ -17,3 +17,48 @@
 html {
   scroll-behavior: smooth;
 }
+
+/* Custom Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f9fafb;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #bae8e8;
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #8fd3d3;
+}
+
+/* Firefox scrollbar styling */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #bae8e8 #f9fafb;
+}
+
+/* Focus visible outline styling */
+:focus-visible {
+  outline: 2px solid #272343;
+  outline-offset: 2px;
+}
+
+/* Remove default focus outline but keep for keyboard navigation */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Smooth transitions for interactive elements */
+button, a, input, select, textarea {
+  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
+}
