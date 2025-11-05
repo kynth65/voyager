@@ -6,11 +6,11 @@ import {
   Users,
   Ship,
   MapPin,
-  Package,
   Clock,
   CheckCircle,
   XCircle,
   AlertCircle,
+  Loader2,
 } from 'lucide-react';
 import {
   getDashboardStats,
@@ -20,8 +20,14 @@ import {
 } from '../../services/dashboard';
 import Layout from '../../components/layout/Layout';
 import { Link } from 'react-router-dom';
+import StatCard from '../../components/dashboard/StatCard';
+import RecentBookingsTable from '../../components/dashboard/RecentBookingsTable';
+import { colors } from '../../styles/colors';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function AdminDashboardPage() {
+  const { user } = useAuth();
+
   // Fetch dashboard statistics
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ['dashboard-stats'],
@@ -51,8 +57,11 @@ export default function AdminDashboardPage() {
       <Layout>
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading dashboard...</p>
+            <Loader2
+              className="animate-spin rounded-full h-12 w-12 mx-auto mb-4"
+              style={{ color: colors.primary.DEFAULT }}
+            />
+            <p style={{ color: colors.text.secondary }}>Loading dashboard...</p>
           </div>
         </div>
       </Layout>
@@ -64,9 +73,7 @@ export default function AdminDashboardPage() {
       label: "Today's Bookings",
       value: stats?.bookings.today || 0,
       icon: Calendar,
-      color: 'blue',
-      bgColor: 'bg-blue-50',
-      textColor: 'text-blue-600',
+      color: 'primary' as const,
       trend: stats?.bookings.total || 0,
       trendLabel: 'Total',
     },
@@ -74,9 +81,7 @@ export default function AdminDashboardPage() {
       label: "Today's Revenue",
       value: `$${(stats?.revenue.today || 0).toFixed(2)}`,
       icon: DollarSign,
-      color: 'green',
-      bgColor: 'bg-green-50',
-      textColor: 'text-green-600',
+      color: 'success' as const,
       trend: `$${(stats?.revenue.total || 0).toFixed(2)}`,
       trendLabel: 'Total',
     },
@@ -84,9 +89,7 @@ export default function AdminDashboardPage() {
       label: 'Pending Bookings',
       value: stats?.bookings.pending || 0,
       icon: Clock,
-      color: 'yellow',
-      bgColor: 'bg-yellow-50',
-      textColor: 'text-yellow-600',
+      color: 'warning' as const,
       trend: stats?.bookings.confirmed || 0,
       trendLabel: 'Confirmed',
     },
@@ -94,9 +97,7 @@ export default function AdminDashboardPage() {
       label: 'Total Customers',
       value: stats?.customers || 0,
       icon: Users,
-      color: 'purple',
-      bgColor: 'bg-purple-50',
-      textColor: 'text-purple-600',
+      color: 'info' as const,
       trend: stats?.bookings.cancelled || 0,
       trendLabel: 'Cancelled',
     },
@@ -107,19 +108,16 @@ export default function AdminDashboardPage() {
       label: 'Active Vessels',
       value: stats?.vessels || 0,
       icon: Ship,
-      color: 'text-blue-600',
     },
     {
       label: 'Total Routes',
       value: stats?.routes || 0,
       icon: MapPin,
-      color: 'text-green-600',
     },
     {
       label: 'Pending Payments',
       value: `$${(stats?.revenue.pending || 0).toFixed(2)}`,
       icon: AlertCircle,
-      color: 'text-yellow-600',
     },
   ];
 
@@ -127,23 +125,20 @@ export default function AdminDashboardPage() {
     {
       label: 'Confirmed',
       count: stats?.bookings.confirmed || 0,
-      color: 'bg-green-500',
+      ...colors.status.confirmed,
       icon: CheckCircle,
-      iconColor: 'text-green-600',
     },
     {
       label: 'Pending',
       count: stats?.bookings.pending || 0,
-      color: 'bg-yellow-500',
+      ...colors.status.pending,
       icon: Clock,
-      iconColor: 'text-yellow-600',
     },
     {
       label: 'Cancelled',
       count: stats?.bookings.cancelled || 0,
-      color: 'bg-red-500',
+      ...colors.status.cancelled,
       icon: XCircle,
-      iconColor: 'text-red-600',
     },
   ];
 
@@ -154,40 +149,27 @@ export default function AdminDashboardPage() {
       <div className="space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <h1 className="text-3xl font-semibold" style={{ color: colors.text.primary }}>
+            {user?.role === 'superadmin' ? 'Superadmin' : 'Admin'} Dashboard
+          </h1>
+          <p className="mt-2 text-sm" style={{ color: colors.text.secondary }}>
             Welcome back! Here's an overview of your ferry booking system.
           </p>
         </div>
 
         {/* Main Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {statCards.map((stat) => {
-            const Icon = stat.icon;
-
-            return (
-              <div
-                key={stat.label}
-                className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-600">{stat.label}</p>
-                    <p className="mt-2 text-3xl font-semibold text-gray-900">{stat.value}</p>
-                    <div className="mt-2 flex items-center text-sm">
-                      <TrendingUp className="w-4 h-4 text-gray-400 mr-1" />
-                      <span className="text-gray-500">
-                        {stat.trend} {stat.trendLabel}
-                      </span>
-                    </div>
-                  </div>
-                  <div className={`p-3 rounded-lg ${stat.bgColor}`}>
-                    <Icon className={`w-6 h-6 ${stat.textColor}`} />
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+          {statCards.map((stat) => (
+            <StatCard
+              key={stat.label}
+              label={stat.label}
+              value={stat.value}
+              icon={stat.icon}
+              color={stat.color}
+              trend={stat.trend}
+              trendLabel={stat.trendLabel}
+            />
+          ))}
         </div>
 
         {/* Quick Stats Bar */}
@@ -197,13 +179,23 @@ export default function AdminDashboardPage() {
             return (
               <div
                 key={stat.label}
-                className="bg-white rounded-lg shadow-sm border border-gray-200 p-4"
+                className="bg-white rounded-xl border p-5 hover:shadow-md transition-all"
+                style={{ borderColor: colors.border.DEFAULT }}
               >
                 <div className="flex items-center gap-3">
-                  <Icon className={`w-5 h-5 ${stat.color}`} />
+                  <div
+                    className="p-3 rounded-lg"
+                    style={{ backgroundColor: colors.accent.light }}
+                  >
+                    <Icon className="w-5 h-5" style={{ color: colors.primary.DEFAULT }} />
+                  </div>
                   <div>
-                    <p className="text-sm text-gray-600">{stat.label}</p>
-                    <p className="text-xl font-semibold text-gray-900">{stat.value}</p>
+                    <p className="text-sm font-medium" style={{ color: colors.text.secondary }}>
+                      {stat.label}
+                    </p>
+                    <p className="text-xl font-semibold mt-0.5" style={{ color: colors.text.primary }}>
+                      {stat.value}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -214,12 +206,18 @@ export default function AdminDashboardPage() {
         {/* Two Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Booking Status Breakdown */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <Package className="w-5 h-5 text-blue-600" />
+          <div
+            className="bg-white rounded-xl border p-6"
+            style={{ borderColor: colors.border.DEFAULT }}
+          >
+            <h3
+              className="text-lg font-semibold mb-6 flex items-center gap-2"
+              style={{ color: colors.text.primary }}
+            >
+              <TrendingUp className="w-5 h-5" />
               Booking Status Overview
             </h3>
-            <div className="space-y-4">
+            <div className="space-y-5">
               {statusBreakdown.map((item) => {
                 const Icon = item.icon;
                 const percentage = totalBookings > 0 ? (item.count / totalBookings) * 100 : 0;
@@ -227,17 +225,33 @@ export default function AdminDashboardPage() {
                   <div key={item.label}>
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
-                        <Icon className={`w-4 h-4 ${item.iconColor}`} />
-                        <span className="text-sm font-medium text-gray-700">{item.label}</span>
+                        <div
+                          className="p-1.5 rounded-lg"
+                          style={{ backgroundColor: item.bg }}
+                        >
+                          <Icon className="w-4 h-4" style={{ color: item.text }} />
+                        </div>
+                        <span className="text-sm font-medium" style={{ color: colors.text.primary }}>
+                          {item.label}
+                        </span>
                       </div>
-                      <span className="text-sm text-gray-600">
-                        {item.count} ({percentage.toFixed(1)}%)
+                      <span className="text-sm font-semibold" style={{ color: colors.text.primary }}>
+                        {item.count}{' '}
+                        <span className="font-normal" style={{ color: colors.text.secondary }}>
+                          ({percentage.toFixed(1)}%)
+                        </span>
                       </span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className="w-full rounded-full h-2.5"
+                      style={{ backgroundColor: colors.border.DEFAULT }}
+                    >
                       <div
-                        className={`${item.color} h-2 rounded-full transition-all duration-300`}
-                        style={{ width: `${percentage}%` }}
+                        className="h-2.5 rounded-full transition-all duration-500"
+                        style={{
+                          width: `${percentage}%`,
+                          backgroundColor: item.text,
+                        }}
                       />
                     </div>
                   </div>
@@ -247,41 +261,74 @@ export default function AdminDashboardPage() {
           </div>
 
           {/* Bookings by Vessel Type */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <Ship className="w-5 h-5 text-blue-600" />
+          <div
+            className="bg-white rounded-xl border p-6"
+            style={{ borderColor: colors.border.DEFAULT }}
+          >
+            <h3
+              className="text-lg font-semibold mb-6 flex items-center gap-2"
+              style={{ color: colors.text.primary }}
+            >
+              <Ship className="w-5 h-5" />
               Bookings by Vessel Type
             </h3>
-            <div className="space-y-4">
+            <div className="space-y-5">
               {bookingsByType && bookingsByType.length > 0 ? (
-                bookingsByType.map((item) => {
+                bookingsByType.map((item, index) => {
                   const totalTypeBookings = bookingsByType.reduce((sum, t) => sum + t.count, 0);
                   const percentage =
                     totalTypeBookings > 0 ? (item.count / totalTypeBookings) * 100 : 0;
 
+                  // Alternate colors for visual distinction
+                  const vesselColors = [
+                    colors.info.DEFAULT,
+                    colors.success.DEFAULT,
+                    colors.warning.DEFAULT,
+                    colors.primary.DEFAULT,
+                  ];
+                  const barColor = vesselColors[index % vesselColors.length];
+
                   return (
                     <div key={item.type}>
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-gray-700 capitalize">
+                        <span
+                          className="text-sm font-medium capitalize"
+                          style={{ color: colors.text.primary }}
+                        >
                           {item.type}
                         </span>
-                        <span className="text-sm text-gray-600">
-                          {item.count} ({percentage.toFixed(1)}%)
+                        <span className="text-sm font-semibold" style={{ color: colors.text.primary }}>
+                          {item.count}{' '}
+                          <span className="font-normal" style={{ color: colors.text.secondary }}>
+                            ({percentage.toFixed(1)}%)
+                          </span>
                         </span>
                       </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div
+                        className="w-full rounded-full h-2.5"
+                        style={{ backgroundColor: colors.border.DEFAULT }}
+                      >
                         <div
-                          className="bg-blue-500 h-2 rounded-full transition-all duration-300"
-                          style={{ width: `${percentage}%` }}
+                          className="h-2.5 rounded-full transition-all duration-500"
+                          style={{
+                            width: `${percentage}%`,
+                            backgroundColor: barColor,
+                          }}
                         />
                       </div>
                     </div>
                   );
                 })
               ) : (
-                <p className="text-sm text-gray-500 text-center py-8">
-                  No booking data available
-                </p>
+                <div className="text-center py-8">
+                  <Ship
+                    className="w-12 h-12 mx-auto mb-3 opacity-40"
+                    style={{ color: colors.text.tertiary }}
+                  />
+                  <p className="text-sm" style={{ color: colors.text.secondary }}>
+                    No booking data available
+                  </p>
+                </div>
               )}
             </div>
           </div>
@@ -290,100 +337,81 @@ export default function AdminDashboardPage() {
         {/* Two Column Layout - Tables */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Recent Bookings */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-blue-600" />
-                Recent Bookings
-              </h3>
-              <Link
-                to="/admin/bookings"
-                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-              >
-                View All
-              </Link>
-            </div>
-            <div className="space-y-3">
-              {bookingsLoading ? (
-                <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                  <p className="mt-2 text-sm text-gray-500">Loading bookings...</p>
-                </div>
-              ) : recentBookings && recentBookings.length > 0 ? (
-                recentBookings.map((booking) => (
-                  <div
-                    key={booking.id}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        {booking.booking_reference}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {booking.user.name} • {booking.passengers} passenger
-                        {booking.passengers > 1 ? 's' : ''}
-                      </p>
-                    </div>
-                    <div className="ml-4 flex-shrink-0">
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          booking.status === 'confirmed'
-                            ? 'bg-green-100 text-green-800'
-                            : booking.status === 'pending'
-                            ? 'bg-yellow-100 text-yellow-800'
-                            : 'bg-red-100 text-red-800'
-                        }`}
-                      >
-                        {booking.status}
-                      </span>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="text-sm text-gray-500 text-center py-8">No recent bookings</p>
-              )}
-            </div>
-          </div>
+          <RecentBookingsTable
+            bookings={recentBookings || []}
+            isLoading={bookingsLoading}
+            emptyMessage="No recent bookings"
+            viewAllLink="/admin/bookings"
+          />
 
           {/* Popular Routes */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-blue-600" />
+          <div
+            className="bg-white rounded-xl border overflow-hidden"
+            style={{ borderColor: colors.border.DEFAULT }}
+          >
+            <div
+              className="px-6 py-4 border-b flex items-center justify-between"
+              style={{ borderColor: colors.border.DEFAULT }}
+            >
+              <h3
+                className="text-lg font-semibold flex items-center gap-2"
+                style={{ color: colors.text.primary }}
+              >
+                <MapPin className="w-5 h-5" />
                 Popular Routes
               </h3>
               <Link
                 to="/admin/routes"
-                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                className="text-sm font-medium hover:underline transition-all"
+                style={{ color: colors.primary.DEFAULT }}
               >
                 View All
               </Link>
             </div>
-            <div className="space-y-3">
+            <div className="p-6">
               {popularRoutes && popularRoutes.length > 0 ? (
-                popularRoutes.map((route) => (
-                  <div
-                    key={route.id}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900">
-                        {route.origin} → {route.destination}
-                      </p>
-                      <p className="text-xs text-gray-500">${Number(route.price).toFixed(2)} per ticket</p>
-                    </div>
-                    <div className="ml-4 flex-shrink-0">
-                      <div className="text-right">
-                        <p className="text-sm font-semibold text-blue-600">
+                <div className="space-y-3">
+                  {popularRoutes.map((route) => (
+                    <div
+                      key={route.id}
+                      className="flex items-center justify-between p-4 rounded-lg hover:shadow-sm transition-all"
+                      style={{ backgroundColor: colors.accent.light }}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p
+                          className="text-sm font-semibold mb-1"
+                          style={{ color: colors.text.primary }}
+                        >
+                          {route.origin} → {route.destination}
+                        </p>
+                        <p className="text-xs" style={{ color: colors.text.secondary }}>
+                          ${Number(route.price).toFixed(2)} per ticket
+                        </p>
+                      </div>
+                      <div className="ml-4 text-right">
+                        <p
+                          className="text-lg font-semibold"
+                          style={{ color: colors.primary.DEFAULT }}
+                        >
                           {route.bookings_count}
                         </p>
-                        <p className="text-xs text-gray-500">bookings</p>
+                        <p className="text-xs" style={{ color: colors.text.tertiary }}>
+                          bookings
+                        </p>
                       </div>
                     </div>
-                  </div>
-                ))
+                  ))}
+                </div>
               ) : (
-                <p className="text-sm text-gray-500 text-center py-8">No route data available</p>
+                <div className="text-center py-8">
+                  <MapPin
+                    className="w-12 h-12 mx-auto mb-3 opacity-40"
+                    style={{ color: colors.text.tertiary }}
+                  />
+                  <p className="text-sm" style={{ color: colors.text.secondary }}>
+                    No route data available
+                  </p>
+                </div>
               )}
             </div>
           </div>
