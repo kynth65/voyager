@@ -1,10 +1,27 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
+import {
+  MapPin,
+  Ship,
+  Clock,
+  DollarSign,
+  Search,
+  Plus,
+  Edit,
+  Trash2,
+  RotateCcw,
+  ChevronLeft,
+  ChevronRight,
+  AlertCircle,
+  Loader2,
+  ArrowRight,
+} from 'lucide-react';
 import { routeService } from '../../services/route';
 import type { RouteListParams, Route } from '../../types/route';
 import Layout from '../../components/layout/Layout';
 import { useDebounce } from '../../hooks/useDebounce';
+import { colors } from '../../styles/colors';
 
 export default function RoutesPage() {
   const navigate = useNavigate();
@@ -66,44 +83,143 @@ export default function RoutesPage() {
     }
   };
 
+  const getStatusBadge = (status: 'active' | 'inactive') => {
+    if (status === 'active') {
+      return (
+        <span
+          className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border"
+          style={{
+            backgroundColor: colors.status.confirmed.bg,
+            color: colors.status.confirmed.text,
+            borderColor: colors.status.confirmed.border,
+          }}
+        >
+          Active
+        </span>
+      );
+    }
+    return (
+      <span
+        className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border"
+        style={{
+          backgroundColor: colors.neutral[100],
+          color: colors.neutral[700],
+          borderColor: colors.neutral[300],
+        }}
+      >
+        Inactive
+      </span>
+    );
+  };
+
+  const clearFilters = () => {
+    setSearch('');
+    setStatusFilter('');
+    setPage(1);
+  };
+
+  if (error) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center py-16">
+          <div className="text-center">
+            <div
+              className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+              style={{ backgroundColor: colors.error.light }}
+            >
+              <AlertCircle className="w-8 h-8" style={{ color: colors.error.DEFAULT }} />
+            </div>
+            <p className="text-lg font-semibold mb-2" style={{ color: colors.text.primary }}>
+              Error loading routes
+            </p>
+            <p className="text-sm" style={{ color: colors.text.secondary }}>
+              Please try again later or contact support if the issue persists.
+            </p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Route Management</h1>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-semibold" style={{ color: colors.text.primary }}>
+              Route Management
+            </h1>
+            <p className="mt-2 text-sm" style={{ color: colors.text.secondary }}>
+              Manage ferry routes and schedules
+            </p>
+          </div>
           <Link
             to="/admin/routes/create"
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all hover:shadow-md"
+            style={{
+              backgroundColor: colors.primary.DEFAULT,
+              color: colors.text.inverse,
+            }}
           >
+            <Plus className="w-4 h-4" />
             Add New Route
           </Link>
         </div>
 
-        {/* Filters */}
-        <div className="bg-white p-4 rounded-lg shadow mb-6">
+        {/* Filters Card */}
+        <div
+          className="bg-white rounded-xl border p-6"
+          style={{ borderColor: colors.border.DEFAULT }}
+        >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Search</label>
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                  setPage(1);
-                }}
-                placeholder="Search routes..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+              <label className="block text-sm font-medium mb-2" style={{ color: colors.text.primary }}>
+                Search
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <Search className="h-5 w-5" style={{ color: colors.text.tertiary }} />
+                </div>
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setPage(1);
+                  }}
+                  placeholder="Search routes..."
+                  className="block w-full pl-11 pr-4 py-2.5 border rounded-lg text-sm transition-all focus:outline-none focus:ring-2"
+                  style={{
+                    borderColor: colors.border.DEFAULT,
+                    color: colors.text.primary,
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = colors.primary.DEFAULT;
+                    e.target.style.boxShadow = `0 0 0 3px ${colors.accent.light}`;
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = colors.border.DEFAULT;
+                    e.target.style.boxShadow = 'none';
+                  }}
+                />
+              </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+              <label className="block text-sm font-medium mb-2" style={{ color: colors.text.primary }}>
+                Status
+              </label>
               <select
                 value={statusFilter}
                 onChange={(e) => {
                   setStatusFilter(e.target.value);
                   setPage(1);
                 }}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="block w-full px-4 py-2.5 border rounded-lg text-sm transition-all focus:outline-none focus:ring-2"
+                style={{
+                  borderColor: colors.border.DEFAULT,
+                  color: colors.text.primary,
+                }}
               >
                 <option value="">All Status</option>
                 <option value="active">Active</option>
@@ -111,197 +227,328 @@ export default function RoutesPage() {
               </select>
             </div>
           </div>
+
+          {/* Filter Summary */}
+          <div
+            className="flex items-center justify-between mt-4 pt-4 border-t"
+            style={{ borderColor: colors.border.DEFAULT }}
+          >
+            <span className="text-sm font-medium" style={{ color: colors.text.primary }}>
+              {data?.total || 0} {data?.total === 1 ? 'route' : 'routes'} found
+            </span>
+            {(search || statusFilter) && (
+              <button
+                onClick={clearFilters}
+                className="px-4 py-2 text-sm font-medium rounded-lg transition-all hover:shadow-sm"
+                style={{
+                  color: colors.text.secondary,
+                  backgroundColor: colors.accent.light,
+                }}
+              >
+                Clear Filters
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* Routes Table */}
-        {isLoading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading routes...</p>
-          </div>
-        ) : error ? (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-            <p className="text-red-600">Error loading routes. Please try again.</p>
-          </div>
-        ) : !data || data.data.length === 0 ? (
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
-            <p className="text-gray-600">No routes found.</p>
-          </div>
-        ) : (
-          <>
-            <div className="bg-white shadow rounded-lg overflow-hidden">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Route
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Vessel
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Duration
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Price
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {data.data.map((route) => (
-                    <tr key={route.id} className={route.deleted_at ? 'bg-gray-50 opacity-60' : ''}>
-                      <td className="px-6 py-4">
-                        <div className="text-sm font-medium text-gray-900">
-                          {route.origin} → {route.destination}
-                        </div>
-                        {route.deleted_at && <span className="text-xs text-red-500">Deleted</span>}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {route.vessel?.name || `Vessel ID: ${route.vessel_id}`}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {formatDuration(route.duration)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        ₱{route.price.toLocaleString()}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            route.status === 'active'
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-gray-100 text-gray-800'
-                          }`}
-                        >
-                          {route.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        {route.deleted_at ? (
-                          <button
-                            onClick={() => handleRestore(route.id)}
-                            className="text-green-600 hover:text-green-900 mr-4"
-                          >
-                            Restore
-                          </button>
-                        ) : (
-                          <>
-                            <button
-                              onClick={() => navigate(`/admin/routes/${route.id}/edit`)}
-                              className="text-blue-600 hover:text-blue-900 mr-4"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => setRouteToDelete(route)}
-                              className="text-red-600 hover:text-red-900"
-                            >
-                              Delete
-                            </button>
-                          </>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+        {/* Routes Table/Cards */}
+        <div
+          className="bg-white rounded-xl border overflow-hidden"
+          style={{ borderColor: colors.border.DEFAULT }}
+        >
+          {isLoading ? (
+            <div className="p-12 text-center">
+              <Loader2
+                className="w-10 h-10 animate-spin mx-auto mb-4"
+                style={{ color: colors.primary.DEFAULT }}
+              />
+              <p className="text-sm font-medium" style={{ color: colors.text.primary }}>
+                Loading routes...
+              </p>
+              <p className="text-xs mt-1" style={{ color: colors.text.secondary }}>
+                Please wait while we fetch the data
+              </p>
             </div>
-
-            {/* Pagination */}
-            {data.last_page > 1 && (
-              <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6 mt-4 rounded-lg">
-                <div className="flex-1 flex justify-between sm:hidden">
-                  <button
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    disabled={page === 1}
-                    className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
-                  >
-                    Previous
-                  </button>
-                  <button
-                    onClick={() => setPage((p) => Math.min(data.last_page, p + 1))}
-                    disabled={page === data.last_page}
-                    className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
-                  >
-                    Next
-                  </button>
-                </div>
-                <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                  <div>
-                    <p className="text-sm text-gray-700">
-                      Showing page <span className="font-medium">{page}</span> of{' '}
-                      <span className="font-medium">{data.last_page}</span>
-                    </p>
-                  </div>
-                  <div>
-                    <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-                      <button
-                        onClick={() => setPage((p) => Math.max(1, p - 1))}
-                        disabled={page === 1}
-                        className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
-                      >
-                        Previous
-                      </button>
-                      <button
-                        onClick={() => setPage((p) => Math.min(data.last_page, p + 1))}
-                        disabled={page === data.last_page}
-                        className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
-                      >
-                        Next
-                      </button>
-                    </nav>
-                  </div>
-                </div>
+          ) : !data || data.data.length === 0 ? (
+            <div className="p-12 text-center">
+              <div
+                className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+                style={{ backgroundColor: colors.accent.light }}
+              >
+                <MapPin className="w-8 h-8" style={{ color: colors.primary.DEFAULT }} />
               </div>
-            )}
-          </>
-        )}
+              <p className="text-base font-semibold mb-1" style={{ color: colors.text.primary }}>
+                No routes found
+              </p>
+              <p className="text-sm mb-4" style={{ color: colors.text.secondary }}>
+                {search || statusFilter
+                  ? 'Try adjusting your filters to see more results'
+                  : 'Get started by creating your first ferry route'}
+              </p>
+              <Link
+                to="/admin/routes/create"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all hover:shadow-md"
+                style={{
+                  backgroundColor: colors.primary.DEFAULT,
+                  color: colors.text.inverse,
+                }}
+              >
+                <Plus className="w-4 h-4" />
+                Add New Route
+              </Link>
+            </div>
+          ) : (
+            <>
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y" style={{ borderColor: colors.border.DEFAULT }}>
+                  <thead style={{ backgroundColor: colors.accent.light }}>
+                    <tr>
+                      <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: colors.text.primary }}>
+                        Route
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: colors.text.primary }}>
+                        Vessel
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: colors.text.primary }}>
+                        Duration
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: colors.text.primary }}>
+                        Price
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: colors.text.primary }}>
+                        Status
+                      </th>
+                      <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider" style={{ color: colors.text.primary }}>
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y" style={{ borderColor: colors.border.DEFAULT }}>
+                    {data.data.map((route) => (
+                      <tr
+                        key={route.id}
+                        className={`hover:bg-opacity-50 transition-colors ${route.deleted_at ? 'opacity-60' : ''}`}
+                        style={{ backgroundColor: 'transparent' }}
+                        onMouseEnter={(e) => !route.deleted_at && (e.currentTarget.style.backgroundColor = colors.accent.light)}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                      >
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div
+                              className="p-2.5 rounded-lg flex-shrink-0"
+                              style={{ backgroundColor: colors.accent.light }}
+                            >
+                              <MapPin className="w-5 h-5" style={{ color: colors.primary.DEFAULT }} />
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2 text-sm font-semibold mb-1" style={{ color: colors.text.primary }}>
+                                {route.origin}
+                                <ArrowRight className="w-4 h-4" style={{ color: colors.text.tertiary }} />
+                                {route.destination}
+                              </div>
+                              {route.deleted_at && (
+                                <span className="text-xs font-medium" style={{ color: colors.error.DEFAULT }}>
+                                  Deleted
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-2 text-sm" style={{ color: colors.text.primary }}>
+                            <Ship className="w-4 h-4" style={{ color: colors.text.tertiary }} />
+                            {route.vessel?.name || `Vessel ID: ${route.vessel_id}`}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center gap-2 text-sm" style={{ color: colors.text.primary }}>
+                            <Clock className="w-4 h-4" style={{ color: colors.text.tertiary }} />
+                            {formatDuration(route.duration)}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center gap-1 text-sm font-semibold" style={{ color: colors.text.primary }}>
+                            <DollarSign className="w-4 h-4" style={{ color: colors.success.DEFAULT }} />
+                            {route.price.toLocaleString()}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {getStatusBadge(route.status)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right">
+                          {route.deleted_at ? (
+                            <button
+                              onClick={() => handleRestore(route.id)}
+                              className="inline-flex items-center gap-2 px-4 py-2 text-xs font-medium rounded-lg transition-all hover:shadow-sm"
+                              style={{
+                                backgroundColor: colors.success.light,
+                                color: colors.success.dark,
+                              }}
+                              title="Restore route"
+                            >
+                              <RotateCcw className="w-4 h-4" />
+                              Restore
+                            </button>
+                          ) : (
+                            <div className="flex items-center justify-end gap-2">
+                              <button
+                                onClick={() => navigate(`/admin/routes/${route.id}/edit`)}
+                                className="p-2 rounded-lg transition-all hover:shadow-sm"
+                                style={{ backgroundColor: colors.accent.light }}
+                                title="Edit route"
+                              >
+                                <Edit className="w-4 h-4" style={{ color: colors.primary.DEFAULT }} />
+                              </button>
+                              <button
+                                onClick={() => setRouteToDelete(route)}
+                                className="p-2 rounded-lg transition-all hover:shadow-sm"
+                                style={{ backgroundColor: colors.error.light }}
+                                title="Delete route"
+                              >
+                                <Trash2 className="w-4 h-4" style={{ color: colors.error.DEFAULT }} />
+                              </button>
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination */}
+              {data && data.last_page > 1 && (
+                <div
+                  className="px-6 py-4 flex items-center justify-between border-t"
+                  style={{
+                    backgroundColor: colors.accent.light,
+                    borderColor: colors.border.DEFAULT,
+                  }}
+                >
+                  <div className="flex-1 flex justify-between sm:hidden">
+                    <button
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
+                      disabled={page === 1}
+                      className="relative inline-flex items-center px-4 py-2 border text-sm font-medium rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      style={{
+                        borderColor: colors.border.DEFAULT,
+                        color: colors.text.primary,
+                        backgroundColor: 'white',
+                      }}
+                    >
+                      Previous
+                    </button>
+                    <button
+                      onClick={() => setPage((p) => Math.min(data.last_page, p + 1))}
+                      disabled={page === data.last_page}
+                      className="ml-3 relative inline-flex items-center px-4 py-2 border text-sm font-medium rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      style={{
+                        borderColor: colors.border.DEFAULT,
+                        color: colors.text.primary,
+                        backgroundColor: 'white',
+                      }}
+                    >
+                      Next
+                    </button>
+                  </div>
+                  <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-sm" style={{ color: colors.text.primary }}>
+                        Showing page <span className="font-semibold">{page}</span> of{' '}
+                        <span className="font-semibold">{data.last_page}</span>
+                      </p>
+                    </div>
+                    <div>
+                      <nav className="relative z-0 inline-flex rounded-lg shadow-sm -space-x-px">
+                        <button
+                          onClick={() => setPage((p) => Math.max(1, p - 1))}
+                          disabled={page === 1}
+                          className="relative inline-flex items-center px-3 py-2 rounded-l-lg border text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-sm"
+                          style={{
+                            borderColor: colors.border.DEFAULT,
+                            color: colors.text.primary,
+                            backgroundColor: 'white',
+                          }}
+                        >
+                          <ChevronLeft className="h-5 w-5" />
+                        </button>
+                        <span
+                          className="relative inline-flex items-center px-4 py-2 border text-sm font-medium"
+                          style={{
+                            borderColor: colors.border.DEFAULT,
+                            color: colors.text.primary,
+                            backgroundColor: 'white',
+                          }}
+                        >
+                          Page {page} of {data.last_page}
+                        </span>
+                        <button
+                          onClick={() => setPage((p) => Math.min(data.last_page, p + 1))}
+                          disabled={page === data.last_page}
+                          className="relative inline-flex items-center px-3 py-2 rounded-r-lg border text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-sm"
+                          style={{
+                            borderColor: colors.border.DEFAULT,
+                            color: colors.text.primary,
+                            backgroundColor: 'white',
+                          }}
+                        >
+                          <ChevronRight className="h-5 w-5" />
+                        </button>
+                      </nav>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
 
         {/* Delete Confirmation Modal */}
         {routeToDelete && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg max-w-md w-full p-6 shadow-xl">
-              <div className="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 rounded-full mb-4">
-                <svg
-                  className="w-6 h-6 text-red-600"
-                  fill="none"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
+            <div
+              className="bg-white rounded-xl max-w-md w-full p-6 shadow-xl"
+              style={{ borderColor: colors.border.DEFAULT }}
+            >
+              <div
+                className="flex items-center justify-center w-14 h-14 mx-auto mb-4 rounded-full"
+                style={{ backgroundColor: colors.error.light }}
+              >
+                <AlertCircle className="w-7 h-7" style={{ color: colors.error.DEFAULT }} />
               </div>
 
-              <h3 className="text-lg font-semibold text-gray-900 text-center mb-2">
+              <h3 className="text-lg font-semibold text-center mb-2" style={{ color: colors.text.primary }}>
                 Delete Route
               </h3>
 
-              <p className="text-sm text-gray-600 text-center mb-6">
-                Are you sure you want to delete the route <strong>{routeToDelete.origin} → {routeToDelete.destination}</strong>?
-                This action will soft delete the route and it can be restored later.
+              <p className="text-sm text-center mb-6" style={{ color: colors.text.secondary }}>
+                Are you sure you want to delete the route{' '}
+                <strong style={{ color: colors.text.primary }}>
+                  {routeToDelete.origin} → {routeToDelete.destination}
+                </strong>
+                ? This action will soft delete the route and it can be restored later.
               </p>
 
               <div className="flex gap-3">
                 <button
                   onClick={() => setRouteToDelete(null)}
                   disabled={deleteMutation.isPending}
-                  className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                  className="flex-1 px-4 py-2.5 rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-sm"
+                  style={{
+                    backgroundColor: colors.neutral[100],
+                    color: colors.text.primary,
+                  }}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleDeleteConfirm}
                   disabled={deleteMutation.isPending}
-                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                  className="flex-1 px-4 py-2.5 rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-md"
+                  style={{
+                    backgroundColor: colors.error.DEFAULT,
+                    color: colors.text.inverse,
+                  }}
                 >
                   {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
                 </button>
