@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { Ship, MapPin, Clock, Users, Search, Filter } from 'lucide-react';
+import { Ship, MapPin, Clock, Users, Search, Filter, ArrowRight, AlertCircle } from 'lucide-react';
 import { routeService } from '../../services/route';
 import type { Route } from '../../types/route';
 import Layout from '../../components/layout/Layout';
@@ -48,10 +48,18 @@ export default function BrowseRoutesPage() {
   if (isLoading) {
     return (
       <Layout>
-        <div className="flex items-center justify-center py-12">
+        <div className="flex items-center justify-center py-20">
           <div className="text-center">
-            <Ship className="w-12 h-12 text-blue-600 animate-bounce mx-auto mb-4" />
-            <p className="text-gray-600">Loading available routes...</p>
+            <Ship
+              className="w-16 h-16 animate-bounce mx-auto mb-4"
+              style={{ color: '#272343' }}
+            />
+            <p
+              className="text-lg font-light"
+              style={{ color: '#272343', opacity: 0.7 }}
+            >
+              Loading available routes...
+            </p>
           </div>
         </div>
       </Layout>
@@ -61,9 +69,31 @@ export default function BrowseRoutesPage() {
   if (error) {
     return (
       <Layout>
-        <div className="flex items-center justify-center py-12">
-          <div className="text-center text-red-600">
-            <p>Error loading routes. Please try again later.</p>
+        <div className="flex items-center justify-center py-20">
+          <div className="text-center">
+            <AlertCircle
+              className="w-16 h-16 mx-auto mb-4"
+              style={{ color: '#dc2626' }}
+            />
+            <p
+              className="text-lg font-light mb-6"
+              style={{ color: '#272343' }}
+            >
+              Error loading routes. Please try again later.
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-8 py-3 text-white rounded-xl font-medium transition-all"
+              style={{ background: '#272343' }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#1a1829';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = '#272343';
+              }}
+            >
+              Try Again
+            </button>
           </div>
         </div>
       </Layout>
@@ -74,33 +104,80 @@ export default function BrowseRoutesPage() {
     <Layout>
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Browse Routes</h1>
-          <p className="text-gray-600 mt-2">Find and book your ferry journey</p>
+        <div className="mb-12">
+          <h1
+            className="text-5xl font-light mb-4"
+            style={{ color: '#272343', letterSpacing: '-0.02em' }}
+          >
+            Browse Ferry Routes
+          </h1>
+          <p
+            className="text-lg font-light"
+            style={{ color: '#272343', opacity: 0.6 }}
+          >
+            Find and book your perfect ferry journey
+          </p>
         </div>
 
         {/* Search and Filter Section */}
-        <div className="bg-white rounded-lg shadow p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div
+          className="bg-white rounded-3xl p-8 sm:p-10 mb-12"
+          style={{
+            borderWidth: '1px',
+            borderColor: '#bae8e8',
+            boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)',
+          }}
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Search */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Search
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4"
+                style={{ color: '#272343', opacity: 0.3 }}
+              />
               <input
                 type="text"
                 placeholder="Search routes or vessels..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-11 pr-4 py-3 border rounded-xl transition-all font-light"
+                style={{
+                  borderColor: '#bae8e8',
+                  color: '#272343',
+                  fontSize: '15px',
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = '#272343';
+                  e.currentTarget.style.outline = 'none';
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = '#bae8e8';
+                }}
               />
             </div>
 
             {/* Origin Filter */}
             <div className="relative">
-              <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <MapPin
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4"
+                style={{ color: '#272343', opacity: 0.3 }}
+              />
               <select
                 value={selectedOrigin}
                 onChange={(e) => setSelectedOrigin(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
+                className="w-full pl-11 pr-4 py-3 border rounded-xl appearance-none transition-all font-light"
+                style={{
+                  borderColor: '#bae8e8',
+                  color: '#272343',
+                  fontSize: '15px',
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = '#272343';
+                  e.currentTarget.style.outline = 'none';
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = '#bae8e8';
+                }}
               >
                 <option value="">All Origins</option>
                 {origins.map(origin => (
@@ -111,11 +188,26 @@ export default function BrowseRoutesPage() {
 
             {/* Destination Filter */}
             <div className="relative">
-              <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <MapPin
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4"
+                style={{ color: '#272343', opacity: 0.3 }}
+              />
               <select
                 value={selectedDestination}
                 onChange={(e) => setSelectedDestination(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
+                className="w-full pl-11 pr-4 py-3 border rounded-xl appearance-none transition-all font-light"
+                style={{
+                  borderColor: '#bae8e8',
+                  color: '#272343',
+                  fontSize: '15px',
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = '#272343';
+                  e.currentTarget.style.outline = 'none';
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = '#bae8e8';
+                }}
               >
                 <option value="">All Destinations</option>
                 {destinations.map(destination => (
@@ -131,9 +223,22 @@ export default function BrowseRoutesPage() {
                 setSelectedOrigin('');
                 setSelectedDestination('');
               }}
-              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
+              className="px-6 py-3 rounded-xl transition-all font-light flex items-center justify-center gap-2"
+              style={{
+                background: '#bae8e8',
+                color: '#272343',
+                fontSize: '15px',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#272343';
+                e.currentTarget.style.color = '#ffffff';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = '#bae8e8';
+                e.currentTarget.style.color = '#272343';
+              }}
             >
-              <Filter className="w-5 h-5" />
+              <Filter className="w-4 h-4" />
               Clear Filters
             </button>
           </div>
@@ -141,86 +246,194 @@ export default function BrowseRoutesPage() {
 
         {/* Routes Grid */}
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            Available Routes ({filteredRoutes.length})
-          </h2>
+          <div className="flex items-center justify-between mb-10">
+            <h2
+              className="text-3xl font-light"
+              style={{ color: '#272343' }}
+            >
+              Available Routes
+              <span
+                className="ml-3 font-light"
+                style={{ color: '#272343', opacity: 0.4 }}
+              >
+                ({filteredRoutes.length})
+              </span>
+            </h2>
+          </div>
 
           {filteredRoutes.length === 0 ? (
-            <div className="text-center py-12 bg-white rounded-lg shadow">
-              <Ship className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600 text-lg">No routes found</p>
-              <p className="text-gray-500 text-sm mt-2">Try adjusting your filters</p>
+            <div
+              className="text-center py-24 bg-white rounded-3xl"
+              style={{
+                borderWidth: '1px',
+                borderColor: '#bae8e8',
+              }}
+            >
+              <Ship
+                className="w-16 h-16 mx-auto mb-4"
+                style={{ color: '#272343', opacity: 0.2 }}
+              />
+              <p
+                className="text-xl font-medium mb-2"
+                style={{ color: '#272343' }}
+              >
+                No routes found
+              </p>
+              <p
+                className="font-light"
+                style={{ color: '#272343', opacity: 0.6 }}
+              >
+                Try adjusting your search filters
+              </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredRoutes.map((route) => (
                 <div
                   key={route.id}
-                  className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow overflow-hidden"
+                  className="group bg-white rounded-3xl overflow-hidden transition-all duration-300 hover:-translate-y-1"
+                  style={{
+                    borderWidth: '1px',
+                    borderColor: '#bae8e8',
+                    boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.boxShadow = '0 10px 15px -3px rgb(0 0 0 / 0.1)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.boxShadow = '0 1px 3px 0 rgb(0 0 0 / 0.1)';
+                  }}
                 >
                   {/* Vessel Image */}
-                  <div className="h-48 bg-gradient-to-br from-blue-400 to-blue-600 relative">
+                  <div
+                    className="relative h-48 overflow-hidden"
+                    style={{
+                      background: '#e3f6f5',
+                    }}
+                  >
                     {route.vessel?.image ? (
                       <img
                         src={route.vessel.image}
                         alt={route.vessel.name}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                       />
                     ) : (
                       <div className="flex items-center justify-center h-full">
-                        <Ship className="w-16 h-16 text-white opacity-50" />
+                        <Ship
+                          className="w-16 h-16"
+                          style={{ color: '#272343', opacity: 0.2 }}
+                        />
                       </div>
                     )}
-                    <div className="absolute top-4 right-4 bg-white px-3 py-1 rounded-full text-sm font-semibold text-blue-600">
-                      ${route.price}
+                    <div className="absolute top-4 right-4 bg-white px-4 py-2 rounded-full">
+                      <span
+                        className="text-xl font-medium"
+                        style={{ color: '#272343' }}
+                      >
+                        ${route.price}
+                      </span>
+                      <span
+                        className="text-xs ml-1 font-light"
+                        style={{ color: '#272343', opacity: 0.5 }}
+                      >
+                        / person
+                      </span>
                     </div>
                   </div>
 
                   {/* Route Details */}
-                  <div className="p-6">
+                  <div className="p-8">
                     {/* Vessel Name */}
-                    <div className="flex items-center gap-2 mb-3">
-                      <Ship className="w-5 h-5 text-gray-600" />
-                      <h3 className="text-lg font-semibold text-gray-900">
+                    <div className="flex items-center gap-2 mb-6">
+                      <Ship
+                        className="w-4 h-4"
+                        style={{ color: '#272343', opacity: 0.4 }}
+                      />
+                      <h3
+                        className="text-lg font-medium"
+                        style={{ color: '#272343' }}
+                      >
                         {route.vessel?.name || 'Ferry'}
                       </h3>
                     </div>
 
                     {/* Route */}
-                    <div className="flex items-center gap-2 mb-3 text-gray-700">
-                      <MapPin className="w-5 h-5 text-blue-600" />
-                      <span className="font-medium">{route.origin}</span>
-                      <span className="text-gray-400">→</span>
-                      <span className="font-medium">{route.destination}</span>
+                    <div
+                      className="flex items-center gap-3 mb-6 pb-6"
+                      style={{ borderBottom: '1px solid #bae8e8' }}
+                    >
+                      <MapPin
+                        className="w-4 h-4 flex-shrink-0"
+                        style={{ color: '#272343', opacity: 0.4 }}
+                      />
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        <span
+                          className="font-light truncate"
+                          style={{ color: '#272343' }}
+                        >
+                          {route.origin}
+                        </span>
+                        <ArrowRight
+                          className="w-3 h-3 flex-shrink-0"
+                          style={{ color: '#272343', opacity: 0.3 }}
+                        />
+                        <span
+                          className="font-light truncate"
+                          style={{ color: '#272343' }}
+                        >
+                          {route.destination}
+                        </span>
+                      </div>
                     </div>
 
-                    {/* Duration */}
-                    <div className="flex items-center gap-2 mb-3 text-gray-600">
-                      <Clock className="w-5 h-5" />
-                      <span>{route.duration} minutes</span>
-                    </div>
-
-                    {/* Capacity */}
-                    {route.vessel?.capacity && (
-                      <div className="flex items-center gap-2 mb-4 text-gray-600">
-                        <Users className="w-5 h-5" />
-                        <span>Capacity: {route.vessel.capacity} passengers</span>
-                      </div>
-                    )}
-
-                    {/* Price & Book Button */}
-                    <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-                      <div className="text-2xl font-bold text-blue-600">
-                        ${route.price}
-                        <span className="text-sm text-gray-500 font-normal"> / person</span>
-                      </div>
-                      <button
-                        onClick={() => handleBookRoute(route)}
-                        className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium"
+                    <div className="space-y-3 mb-8">
+                      {/* Duration */}
+                      <div
+                        className="flex items-center gap-3 font-light"
+                        style={{
+                          color: '#272343',
+                          opacity: 0.6,
+                          fontSize: '15px',
+                        }}
                       >
-                        Book Now
-                      </button>
+                        <Clock className="w-4 h-4" style={{ opacity: 0.6 }} />
+                        <span>{route.duration} minutes</span>
+                      </div>
+
+                      {/* Capacity */}
+                      {route.vessel?.capacity && (
+                        <div
+                          className="flex items-center gap-3 font-light"
+                          style={{
+                            color: '#272343',
+                            opacity: 0.6,
+                            fontSize: '15px',
+                          }}
+                        >
+                          <Users className="w-4 h-4" style={{ opacity: 0.6 }} />
+                          <span>Up to {route.vessel.capacity} passengers</span>
+                        </div>
+                      )}
                     </div>
+
+                    {/* Book Button */}
+                    <button
+                      onClick={() => handleBookRoute(route)}
+                      className="w-full py-3 text-white rounded-xl font-medium transition-all duration-200 flex items-center justify-center gap-2 group"
+                      style={{
+                        background: '#272343',
+                        fontSize: '15px',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = '#1a1829';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = '#272343';
+                      }}
+                    >
+                      Book This Route
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </button>
                   </div>
                 </div>
               ))}
