@@ -31,6 +31,8 @@ Route::get('/routes', [RouteController::class, 'index']);
 Route::get('/routes/{route}', [RouteController::class, 'show']);
 Route::get('/vessels', [VesselController::class, 'index']);
 Route::get('/vessels/{vessel}', [VesselController::class, 'show']);
+// Public capacity check (so users can plan bookings before authentication)
+Route::get('vessels/{vessel}/capacity', [BookingController::class, 'getCapacity']);
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
@@ -78,7 +80,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('bookings/{booking}/confirm', [BookingController::class, 'confirm']);
     Route::post('bookings/{booking}/cancel', [BookingController::class, 'cancel']);
     Route::get('bookings/{booking}/ticket', [BookingController::class, 'downloadTicket']);
-    Route::get('vessels/{vessel}/capacity', [BookingController::class, 'getCapacity']);
 
     // Payments
     Route::apiResource('payments', PaymentController::class);
