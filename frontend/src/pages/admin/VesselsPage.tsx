@@ -22,6 +22,7 @@ import type { VesselListParams, Vessel, VesselType, VesselStatus } from '../../t
 import Layout from '../../components/layout/Layout';
 import { useDebounce } from '../../hooks/useDebounce';
 import { colors } from '../../styles/colors';
+import { getVesselImage } from '../../utils/vesselImages';
 
 export default function VesselsPage() {
   const navigate = useNavigate();
@@ -377,9 +378,9 @@ export default function VesselsPage() {
                       >
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            {vessel.image ? (
+                            {vessel.image || getVesselImage(vessel.name) ? (
                               <img
-                                src={vessel.image}
+                                src={vessel.image || getVesselImage(vessel.name) || ''}
                                 alt={vessel.name}
                                 className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
                                 style={{ border: `2px solid ${colors.border.DEFAULT}` }}
