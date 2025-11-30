@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useForm, type SubmitHandler } from "react-hook-form";
@@ -10,11 +10,11 @@ import {
   Calendar,
   Clock,
   Users,
+  User,
   CreditCard,
   AlertCircle,
   CheckCircle,
   ArrowLeft,
-  UserPlus,
   Info,
   ArrowRight,
   Download,
@@ -26,6 +26,11 @@ import type { CreateBookingRequest } from "../../types/booking";
 import { useAuth } from "../../contexts/AuthContext";
 import Navbar from "../../components/common/Navbar";
 import Layout from "../../components/layout/Layout";
+import {
+  savePendingBooking,
+  getPendingBooking,
+  clearPendingBooking,
+} from "../../utils/pendingBooking";
 
 // Booking form validation schema
 const bookingSchema = z.object({
@@ -34,7 +39,7 @@ const bookingSchema = z.object({
   passengers: z
     .number()
     .min(1, "At least 1 passenger is required")
-    .max(50, "Maximum 50 passengers"),
+    .max(1000, "Invalid passenger count"), // Max will be validated dynamically based on capacity
   special_requirements: z.string().optional(),
   payment_method: z.enum([
     "credit_card",
@@ -54,10 +59,11 @@ export default function BookingPage() {
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const [bookingReference, setBookingReference] = useState("");
   const [bookingId, setBookingId] = useState<number | null>(null);
-  const [showGuestModal, setShowGuestModal] = useState(false);
   const [downloadingTicket, setDownloadingTicket] = useState(false);
   const [downloadSuccess, setDownloadSuccess] = useState(false);
   const [downloadError, setDownloadError] = useState<string | null>(null);
+  const [availableDepartureTimes, setAvailableDepartureTimes] = useState<string[]>([]);
+  const [bookingRestored, setBookingRestored] = useState(false);
 
   // Fetch route details
   const {
@@ -70,11 +76,13 @@ export default function BookingPage() {
     enabled: !!routeId,
   });
 
+
   // Form setup
   const {
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<BookingFormData>({
     resolver: zodResolver(bookingSchema),
@@ -89,7 +97,58 @@ export default function BookingPage() {
   const departureTime = watch("departure_time");
   const totalAmount = route ? route.price * (passengers || 1) : 0;
 
+  // Restore pending booking data after login
+  useEffect(() => {
+    if (isAuthenticated && route) {
+      const pendingBooking = getPendingBooking();
+
+      // Only restore if the pending booking is for the current route
+      if (pendingBooking && pendingBooking.route_id === route.id) {
+        // Restore form values
+        setValue("booking_date", pendingBooking.booking_date);
+        setValue("departure_time", pendingBooking.departure_time);
+        setValue("passengers", pendingBooking.passengers);
+        setValue("payment_method", pendingBooking.payment_method as any);
+        if (pendingBooking.special_requirements) {
+          setValue("special_requirements", pendingBooking.special_requirements);
+        }
+
+        // Show a success message to the user
+        setBookingRestored(true);
+        // Hide the message after 5 seconds
+        setTimeout(() => setBookingRestored(false), 5000);
+      }
+    }
+  }, [isAuthenticated, route, setValue]);
+
+  // Parse departure times from route schedule when route data loads
+  useEffect(() => {
+    if (route?.schedule) {
+      try {
+        const parsed = typeof route.schedule === 'string'
+          ? JSON.parse(route.schedule)
+          : route.schedule;
+
+        let times: string[] = [];
+        // Check if it's an object with departure_times array (new format)
+        if (parsed.departure_times && Array.isArray(parsed.departure_times)) {
+          times = parsed.departure_times;
+        } else if (Array.isArray(parsed)) {
+          // Legacy format: array of times
+          times = parsed;
+        }
+        setAvailableDepartureTimes(times);
+      } catch (e) {
+        console.error('Failed to parse route schedule:', e);
+        setAvailableDepartureTimes([]);
+      }
+    } else {
+      setAvailableDepartureTimes([]);
+    }
+  }, [route]);
+
   // Fetch capacity information when date, time, and passengers change
+  // Now public endpoint - works for both authenticated and unauthenticated users
   const { data: capacityData, isLoading: capacityLoading } = useQuery({
     queryKey: [
       "vessel-capacity",
@@ -123,6 +182,8 @@ export default function BookingPage() {
       setBookingSuccess(true);
       setBookingReference(response.booking.booking_reference);
       setBookingId(response.booking.id);
+      // Clear pending booking after successful booking
+      clearPendingBooking();
     },
   });
 
@@ -175,23 +236,20 @@ export default function BookingPage() {
 
     // Check if user is authenticated
     if (!isAuthenticated) {
-      // Store booking data in localStorage for later
-      localStorage.setItem(
-        "pending_booking",
-        JSON.stringify({
-          ...bookingData,
-          route: {
-            id: route.id,
-            origin: route.origin,
-            destination: route.destination,
-            price: route.price,
-            duration: route.duration,
-            vessel_name: route.vessel?.name || "Ferry",
-          },
-        })
-      );
-      // Show modal to prompt user to register
-      setShowGuestModal(true);
+      // Store booking data using utility function
+      savePendingBooking({
+        ...bookingData,
+        route: {
+          id: route.id,
+          origin: route.origin,
+          destination: route.destination,
+          price: route.price,
+          duration: route.duration,
+          vessel_name: route.vessel?.name || "Ferry",
+        },
+      });
+      // Redirect directly to login page
+      navigate("/login");
       return;
     }
 
@@ -576,6 +634,41 @@ export default function BookingPage() {
           Back to Routes
         </button>
 
+        {/* Booking Restored Success Banner - Show when user returns after login */}
+        {bookingRestored && isAuthenticated && (
+          <div
+            className="rounded-2xl p-5 sm:p-6 mb-8 animate-fade-in"
+            style={{
+              background: "#dcfce7",
+              borderWidth: "1px",
+              borderColor: "#bbf7d0",
+            }}
+          >
+            <div className="flex items-start gap-4">
+              <div
+                className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center"
+                style={{ background: "#bbf7d0" }}
+              >
+                <CheckCircle className="w-5 h-5 text-green-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3
+                  className="text-lg font-medium mb-2"
+                  style={{ color: "#166534" }}
+                >
+                  Welcome Back!
+                </h3>
+                <p
+                  className="text-sm font-light"
+                  style={{ color: "#166534", opacity: 0.8 }}
+                >
+                  Your booking details have been restored. Please review the information below and complete your reservation.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Auth Required Banner - Only show for unauthorized users */}
         {!isAuthenticated && (
           <div
@@ -598,14 +691,13 @@ export default function BookingPage() {
                   className="text-lg font-medium mb-2"
                   style={{ color: "#78350f" }}
                 >
-                  Sign In Required
+                  No Sign In Required to Browse
                 </h3>
                 <p
                   className="text-sm font-light mb-4"
                   style={{ color: "#78350f", opacity: 0.8 }}
                 >
-                  You need to be signed in to complete a booking. Create a free
-                  account or sign in to continue with your ferry reservation.
+                  Feel free to fill out the booking form below to check availability and pricing. You'll be asked to sign in when you're ready to complete your reservation.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3">
                   <button
@@ -619,7 +711,7 @@ export default function BookingPage() {
                       e.currentTarget.style.background = "#f59e0b";
                     }}
                   >
-                    <UserPlus className="w-4 h-4" />
+                    <User className="w-4 h-4" />
                     Create Free Account
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </button>
@@ -705,7 +797,7 @@ export default function BookingPage() {
                   )}
                 </div>
 
-                {/* Departure Time */}
+                {/* Departure Time - Fixed Schedule */}
                 <div>
                   <label
                     className="flex items-center gap-2 text-sm font-medium mb-3"
@@ -714,33 +806,67 @@ export default function BookingPage() {
                     <Clock className="w-4 h-4" />
                     Departure Time *
                   </label>
-                  <input
-                    type="time"
-                    {...register("departure_time")}
-                    className="w-full px-4 py-3 border rounded-xl font-light transition-all"
-                    style={{
-                      borderColor: errors.departure_time
-                        ? "#fca5a5"
-                        : "#bae8e8",
-                      color: "#272343",
-                      fontSize: "15px",
-                    }}
-                    onFocus={(e) => {
-                      if (!errors.departure_time) {
-                        e.currentTarget.style.borderColor = "#272343";
-                        e.currentTarget.style.outline = "none";
-                      }
-                    }}
-                    onBlur={(e) => {
-                      if (!errors.departure_time) {
-                        e.currentTarget.style.borderColor = "#bae8e8";
-                      }
-                    }}
-                  />
+                  {availableDepartureTimes.length > 0 ? (
+                    <select
+                      {...register("departure_time")}
+                      className="w-full px-4 py-3 border rounded-xl font-light transition-all appearance-none bg-white"
+                      style={{
+                        borderColor: errors.departure_time
+                          ? "#fca5a5"
+                          : "#bae8e8",
+                        color: "#272343",
+                        fontSize: "15px",
+                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23272343'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
+                        backgroundRepeat: 'no-repeat',
+                        backgroundPosition: 'right 0.75rem center',
+                        backgroundSize: '1.5em 1.5em',
+                        paddingRight: '2.5rem',
+                      }}
+                      onFocus={(e) => {
+                        if (!errors.departure_time) {
+                          e.currentTarget.style.borderColor = "#272343";
+                          e.currentTarget.style.outline = "none";
+                        }
+                      }}
+                      onBlur={(e) => {
+                        if (!errors.departure_time) {
+                          e.currentTarget.style.borderColor = "#bae8e8";
+                        }
+                      }}
+                    >
+                      <option value="">Select departure time...</option>
+                      {availableDepartureTimes.map((time) => (
+                        <option key={time} value={time}>
+                          {time}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <div
+                      className="w-full px-4 py-3 border rounded-xl"
+                      style={{
+                        borderColor: "#fca5a5",
+                        backgroundColor: "#fee2e2",
+                      }}
+                    >
+                      <p className="text-sm text-red-800 flex items-center gap-2 font-light">
+                        <AlertCircle className="w-4 h-4" />
+                        No departure times available for this route. Please contact support.
+                      </p>
+                    </div>
+                  )}
                   {errors.departure_time && (
                     <p className="mt-2 text-sm text-red-600 flex items-center gap-1 font-light">
                       <AlertCircle className="w-4 h-4" />
                       {errors.departure_time.message}
+                    </p>
+                  )}
+                  {availableDepartureTimes.length > 0 && (
+                    <p
+                      className="mt-2 text-xs font-light"
+                      style={{ color: "#272343", opacity: 0.6 }}
+                    >
+                      Available times: {availableDepartureTimes.join(", ")}
                     </p>
                   )}
                 </div>
@@ -758,7 +884,11 @@ export default function BookingPage() {
                     type="number"
                     {...register("passengers", { valueAsNumber: true })}
                     min="1"
-                    max="50"
+                    max={
+                      capacityData && bookingDate && departureTime
+                        ? capacityData.available_seats
+                        : route?.vessel?.capacity || 50
+                    }
                     className="w-full px-4 py-3 border rounded-xl font-light transition-all"
                     style={{
                       borderColor: errors.passengers ? "#fca5a5" : "#bae8e8",
@@ -781,6 +911,14 @@ export default function BookingPage() {
                     <p className="mt-2 text-sm text-red-600 flex items-center gap-1 font-light">
                       <AlertCircle className="w-4 h-4" />
                       {errors.passengers.message}
+                    </p>
+                  )}
+                  {capacityData && bookingDate && departureTime && (
+                    <p
+                      className="mt-2 text-xs font-light"
+                      style={{ color: "#272343", opacity: 0.6 }}
+                    >
+                      Maximum {capacityData.available_seats} passenger{capacityData.available_seats !== 1 ? 's' : ''} available for this date & time
                     </p>
                   )}
                 </div>
@@ -1440,127 +1578,6 @@ export default function BookingPage() {
           </div>
         </div>
       </div>
-
-      {/* Guest Modal - Prompt to create account */}
-      {showGuestModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 animate-fade-in">
-          <div
-            className="bg-white rounded-3xl max-w-md w-full p-8 sm:p-10 animate-scale-in"
-            style={{
-              borderWidth: "1px",
-              borderColor: "#bae8e8",
-              boxShadow: "0 25px 50px -12px rgb(0 0 0 / 0.25)",
-            }}
-          >
-            {/* Icon and Header */}
-            <div className="text-center mb-8">
-              <div
-                className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-5"
-                style={{ background: "#e3f6f5" }}
-              >
-                <UserPlus className="w-10 h-10" style={{ color: "#272343" }} />
-              </div>
-              <h2
-                className="text-3xl font-light mb-3"
-                style={{ color: "#272343", letterSpacing: "-0.02em" }}
-              >
-                Account Required
-              </h2>
-              <p
-                className="font-light leading-relaxed"
-                style={{ color: "#272343", opacity: 0.6, fontSize: "15px" }}
-              >
-                To complete your booking, please create a free account or sign
-                in. Your booking details have been saved securely.
-              </p>
-            </div>
-
-            {/* Saved Booking Details */}
-            <div
-              className="rounded-2xl p-5 mb-8"
-              style={{
-                background: "#e3f6f5",
-                borderWidth: "1px",
-                borderColor: "#bae8e8",
-              }}
-            >
-              <h3
-                className="font-medium mb-3"
-                style={{ color: "#272343", fontSize: "15px" }}
-              >
-                Your Saved Booking:
-              </h3>
-              <div
-                className="space-y-2 text-sm font-light"
-                style={{ color: "#272343", opacity: 0.8 }}
-              >
-                <div className="flex items-center gap-2">
-                  <MapPin className="w-4 h-4" style={{ opacity: 0.6 }} />
-                  <span>
-                    {route?.origin} → {route?.destination}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Users className="w-4 h-4" style={{ opacity: 0.6 }} />
-                  <span>{passengers} passenger(s)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CreditCard className="w-4 h-4" style={{ opacity: 0.6 }} />
-                  <span className="font-medium">${totalAmount.toFixed(2)}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex flex-col gap-3">
-              <button
-                onClick={() => navigate("/register")}
-                className="w-full py-3.5 text-white rounded-xl font-medium transition-all flex items-center justify-center gap-2 group"
-                style={{ background: "#272343" }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = "#1a1829";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "#272343";
-                }}
-              >
-                <UserPlus className="w-5 h-5" />
-                Create Free Account
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </button>
-              <button
-                onClick={() => navigate("/login")}
-                className="w-full py-3.5 rounded-xl font-medium transition-all"
-                style={{
-                  background: "#bae8e8",
-                  color: "#272343",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = "#a0d8d8";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "#bae8e8";
-                }}
-              >
-                I Already Have an Account
-              </button>
-              <button
-                onClick={() => setShowGuestModal(false)}
-                className="w-full py-2.5 text-sm font-light transition-colors"
-                style={{ color: "#272343", opacity: 0.6 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.opacity = "1";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.opacity = "0.6";
-                }}
-              >
-                Go Back to Form
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 
