@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { getPendingBooking } from './utils/pendingBooking';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
@@ -65,7 +66,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-// Public Route wrapper (redirect to dashboard if already logged in)
+// Public Route wrapper (redirect to dashboard if already logged in, but check for pending bookings first)
 function PublicRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
 
@@ -81,6 +82,13 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   }
 
   if (isAuthenticated) {
+    // Check if there's a pending booking
+    const pendingBooking = getPendingBooking();
+    if (pendingBooking) {
+      // Redirect to the booking page to complete the booking
+      return <Navigate to={`/booking/${pendingBooking.route_id}`} replace />;
+    }
+    // No pending booking, redirect to dashboard
     return <Navigate to="/dashboard" replace />;
   }
 
