@@ -34,10 +34,15 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Unauthorized - clear token and redirect to login
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+      // Only redirect to login if we sent an auth token (i.e., user was logged in)
+      // This prevents redirecting on 401 from public endpoints
+      const hasAuthToken = localStorage.getItem('auth_token');
+      if (hasAuthToken) {
+        // Unauthorized - clear token and redirect to login
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }
