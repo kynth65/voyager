@@ -6,7 +6,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import {
   MapPin,
-  Ship,
   Clock,
   DollarSign,
   ArrowLeft,
@@ -39,6 +38,8 @@ export default function RouteFormPage() {
   const isEditMode = Boolean(id);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [departureTimes, setDepartureTimes] = useState<string[]>([]);
+  const [newDepartureTime, setNewDepartureTime] = useState<string>('');
 
   // Fetch route data if editing
   const { data: route, isLoading } = useQuery({
@@ -74,15 +75,25 @@ export default function RouteFormPage() {
   // Pre-populate form when route data is loaded
   useEffect(() => {
     if (route) {
-      // Convert schedule from JSON object to string for textarea
-      let scheduleString = '';
+      // Parse departure times from schedule
+      let times: string[] = [];
       if (route.schedule) {
-        if (typeof route.schedule === 'string') {
-          scheduleString = route.schedule;
-        } else {
-          scheduleString = JSON.stringify(route.schedule, null, 2);
+        try {
+          const parsed = typeof route.schedule === 'string'
+            ? JSON.parse(route.schedule)
+            : route.schedule;
+
+          // Check if it's an array of times (new format)
+          if (Array.isArray(parsed)) {
+            times = parsed;
+          } else if (parsed.departure_times && Array.isArray(parsed.departure_times)) {
+            times = parsed.departure_times;
+          }
+        } catch (e) {
+          console.error('Failed to parse schedule:', e);
         }
       }
+      setDepartureTimes(times);
 
       reset({
         vessel_id: route.vessel_id,
@@ -90,7 +101,6 @@ export default function RouteFormPage() {
         destination: route.destination,
         price: route.price,
         duration: route.duration,
-        schedule: scheduleString,
         status: route.status,
       });
     }
@@ -118,45 +128,47 @@ export default function RouteFormPage() {
     },
   });
 
+  const addDepartureTime = () => {
+    if (!newDepartureTime) return;
+
+    // Check if time already exists
+    if (departureTimes.includes(newDepartureTime)) {
+      setError('This departure time already exists');
+      setTimeout(() => setError(null), 3000);
+      return;
+    }
+
+    // Add the new time and sort
+    const updatedTimes = [...departureTimes, newDepartureTime].sort();
+    setDepartureTimes(updatedTimes);
+    setNewDepartureTime('');
+  };
+
+  const removeDepartureTime = (timeToRemove: string) => {
+    setDepartureTimes(departureTimes.filter(time => time !== timeToRemove));
+  };
+
   const onSubmit = (data: RouteFormData) => {
     setError(null);
     setSuccess(null);
 
-    // Prepare data for submission
-    const submitData = { ...data };
-
-    // Handle schedule field - convert to JSON string or null
-    if (submitData.schedule && submitData.schedule.trim() !== '') {
-      try {
-        // Try to parse as JSON first (in case user entered JSON)
-        JSON.parse(submitData.schedule);
-        // If it's already valid JSON, send as is
-      } catch {
-        // If not valid JSON, wrap in quotes to make it a valid JSON string
-        submitData.schedule = JSON.stringify(submitData.schedule);
-      }
-    } else {
-      // If empty, send null
-      submitData.schedule = undefined;
+    // Validate that at least one departure time is set
+    if (departureTimes.length === 0) {
+      setError('Please add at least one departure time');
+      return;
     }
+
+    // Prepare data for submission
+    const submitData = {
+      ...data,
+      // Store departure times as JSON array
+      schedule: JSON.stringify({ departure_times: departureTimes }),
+    };
 
     if (isEditMode) {
       updateMutation.mutate(submitData);
     } else {
       createMutation.mutate(submitData);
-    }
-  };
-
-  const formatDurationPreview = (minutes: number): string => {
-    if (!minutes || minutes === 0) return '';
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    if (hours > 0 && mins > 0) {
-      return `${hours}h ${mins}m`;
-    } else if (hours > 0) {
-      return `${hours}h`;
-    } else {
-      return `${mins}m`;
     }
   };
 
@@ -500,40 +512,116 @@ export default function RouteFormPage() {
                 </div>
               </div>
 
-              {/* Schedule */}
+              {/* Fixed Departure Times */}
               <div>
                 <label className="block text-sm font-medium mb-2" style={{ color: colors.text.primary }}>
-                  Schedule
+                  Fixed Departure Schedule <span style={{ color: colors.error.DEFAULT }}>*</span>
                 </label>
-                <textarea
-                  {...register('schedule')}
-                  rows={4}
-                  placeholder='e.g., Daily departures at 8:00 AM, 12:00 PM, 4:00 PM&#x0a;or JSON: {"monday": ["08:00", "12:00"], "tuesday": ["08:00", "14:00"]}'
-                  className="block w-full px-4 py-2.5 border rounded-lg text-sm transition-all focus:outline-none focus:ring-2 resize-none font-mono"
+                <div
+                  className="rounded-xl border p-5"
                   style={{
-                    borderColor: errors.schedule ? colors.error.DEFAULT : colors.border.DEFAULT,
-                    color: colors.text.primary,
+                    backgroundColor: colors.accent.light,
+                    borderColor: colors.border.DEFAULT,
                   }}
-                  onFocus={(e) => {
-                    if (!errors.schedule) {
-                      e.target.style.borderColor = colors.primary.DEFAULT;
-                      e.target.style.boxShadow = `0 0 0 3px ${colors.accent.light}`;
-                    }
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = errors.schedule ? colors.error.DEFAULT : colors.border.DEFAULT;
-                    e.target.style.boxShadow = 'none';
-                  }}
-                />
-                {errors.schedule && (
-                  <p className="mt-1.5 text-xs font-medium flex items-center gap-1" style={{ color: colors.error.DEFAULT }}>
-                    <AlertCircle className="w-3.5 h-3.5" />
-                    {errors.schedule.message}
+                >
+                  {/* Add Departure Time Input */}
+                  <div className="flex gap-3 mb-4">
+                    <div className="flex-1">
+                      <input
+                        type="time"
+                        value={newDepartureTime}
+                        onChange={(e) => setNewDepartureTime(e.target.value)}
+                        className="block w-full px-4 py-2.5 border rounded-lg text-sm transition-all focus:outline-none focus:ring-2"
+                        style={{
+                          borderColor: colors.border.DEFAULT,
+                          color: colors.text.primary,
+                          backgroundColor: 'white',
+                        }}
+                        onFocus={(e) => {
+                          e.target.style.borderColor = colors.primary.DEFAULT;
+                          e.target.style.boxShadow = `0 0 0 3px ${colors.accent.light}`;
+                        }}
+                        onBlur={(e) => {
+                          e.target.style.borderColor = colors.border.DEFAULT;
+                          e.target.style.boxShadow = 'none';
+                        }}
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            addDepartureTime();
+                          }
+                        }}
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={addDepartureTime}
+                      disabled={!newDepartureTime}
+                      className="px-5 py-2.5 rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      style={{
+                        backgroundColor: colors.primary.DEFAULT,
+                        color: colors.text.inverse,
+                      }}
+                    >
+                      Add Time
+                    </button>
+                  </div>
+
+                  {/* List of Departure Times */}
+                  {departureTimes.length > 0 ? (
+                    <div className="space-y-2">
+                      <p className="text-xs font-medium mb-2" style={{ color: colors.text.secondary }}>
+                        Scheduled Departure Times ({departureTimes.length})
+                      </p>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        {departureTimes.map((time) => (
+                          <div
+                            key={time}
+                            className="flex items-center justify-between gap-2 px-3 py-2 bg-white border rounded-lg"
+                            style={{ borderColor: colors.border.DEFAULT }}
+                          >
+                            <div className="flex items-center gap-2">
+                              <Clock className="w-4 h-4" style={{ color: colors.primary.DEFAULT }} />
+                              <span className="text-sm font-medium" style={{ color: colors.text.primary }}>
+                                {time}
+                              </span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => removeDepartureTime(time)}
+                              className="p-1 rounded hover:bg-red-50 transition-colors"
+                              title="Remove this time"
+                            >
+                              <X className="w-4 h-4" style={{ color: colors.error.DEFAULT }} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div
+                      className="rounded-lg p-4 text-center"
+                      style={{
+                        backgroundColor: 'white',
+                        borderWidth: '2px',
+                        borderStyle: 'dashed',
+                        borderColor: colors.border.DEFAULT,
+                      }}
+                    >
+                      <Clock className="w-8 h-8 mx-auto mb-2" style={{ color: colors.text.tertiary }} />
+                      <p className="text-sm" style={{ color: colors.text.secondary }}>
+                        No departure times added yet
+                      </p>
+                      <p className="text-xs mt-1" style={{ color: colors.text.tertiary }}>
+                        Add at least one departure time to continue
+                      </p>
+                    </div>
+                  )}
+
+                  <p className="mt-3 text-xs" style={{ color: colors.text.tertiary }}>
+                    Add fixed departure times for this route (e.g., 08:00, 12:00, 16:00, 20:00)
                   </p>
-                )}
-                <p className="mt-1.5 text-xs" style={{ color: colors.text.tertiary }}>
-                  Optional: Enter plain text or JSON format for departure schedules
-                </p>
+                </div>
               </div>
 
               {/* Status */}
