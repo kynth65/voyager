@@ -6,7 +6,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import {
   Ship,
-  Upload,
   X,
   Loader2,
   ArrowLeft,
