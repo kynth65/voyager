@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { useAuth } from '../../contexts/AuthContext';
 import { UserPlus, Mail, Lock, User, Phone, AlertCircle, Ship } from 'lucide-react';
 import Navbar from '../../components/common/Navbar';
+import { getPendingBooking } from '../../utils/pendingBooking';
 
 const registerSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -30,13 +31,9 @@ export default function RegisterPage() {
 
   // Check for pending booking on mount
   useEffect(() => {
-    const storedBooking = localStorage.getItem('pending_booking');
+    const storedBooking = getPendingBooking();
     if (storedBooking) {
-      try {
-        setPendingBooking(JSON.parse(storedBooking));
-      } catch (e) {
-        console.error('Failed to parse pending booking:', e);
-      }
+      setPendingBooking(storedBooking);
     }
   }, []);
 
@@ -61,10 +58,13 @@ export default function RegisterPage() {
 
       await registerUser(registrationData);
 
-      // Check if there's a pending booking
-      if (pendingBooking) {
-        // Redirect to booking confirmation page instead of dashboard
-        navigate('/confirm-booking');
+      // Check if there's a pending booking by reading from localStorage directly
+      // This ensures we get the latest value and avoid state timing issues
+      const storedBooking = getPendingBooking();
+      if (storedBooking) {
+        // Redirect back to the booking page with the route ID
+        // The booking page will automatically restore the form data
+        navigate(`/booking/${storedBooking.route_id}`);
       } else {
         // Normal registration flow
         navigate('/dashboard');
