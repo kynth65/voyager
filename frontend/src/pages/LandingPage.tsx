@@ -26,6 +26,7 @@ import {
 import { routeService } from "../services/route";
 import type { Route } from "../types/route";
 import Navbar from "../components/common/Navbar";
+import { getVesselImage } from "../utils/vesselImages";
 
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -115,24 +116,24 @@ export default function LandingPage() {
             className="w-full h-full object-cover"
           />
           {/* Overlay gradient for better text readability */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/40 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30 md:bg-gradient-to-r md:from-black/60 md:via-black/40 md:to-transparent"></div>
         </div>
 
-        <div className="relative w-full px-8 sm:px-12 lg:px-16 xl:px-20 py-32">
-          <div className="flex items-end justify-between min-h-[70vh]">
+        <div className="relative w-full px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 py-20 sm:py-24 md:py-32">
+          <div className="flex flex-col md:flex-row items-center md:items-end justify-between min-h-[70vh] gap-8 md:gap-4">
             {/* Left content */}
-            <div className="max-w-3xl text-white">
+            <div className="max-w-3xl text-white text-center md:text-left">
               {/* Main heading */}
               <h1
-                className="mb-16 animate-fade-in-up"
+                className="mb-8 sm:mb-12 md:mb-16 animate-fade-in-up"
                 style={{
                   fontFamily:
                     '"Fraunces", "Zodiak", "Zodiak Placeholder", serif',
-                  fontSize: "95px",
+                  fontSize: "clamp(2.5rem, 8vw, 5.9375rem)", // 40px to 95px responsive
                   fontWeight: 300,
                   letterSpacing: "-0.04em",
                   lineHeight: "1.2em",
-                  textAlign: "start",
+                  textAlign: "inherit",
                 }}
               >
                 Your Gateway to
@@ -142,7 +143,7 @@ export default function LandingPage() {
               </h1>
 
               <p
-                className="text-base max-w-lg animate-fade-in-up delay-200"
+                className="text-sm sm:text-base max-w-lg mx-auto md:mx-0 animate-fade-in-up delay-200"
                 style={{ color: "#e3f6f5" }}
               >
                 Experience seamless accommodations, world-class amenities, and
@@ -159,7 +160,7 @@ export default function LandingPage() {
                     document.getElementById("search-routes");
                   searchSection?.scrollIntoView({ behavior: "smooth" });
                 }}
-                className="group w-52 h-52 rounded-full font-medium text-lg transition-all duration-300 shadow-2xl hover:scale-105 flex flex-col items-center justify-center"
+                className="group w-36 h-36 sm:w-44 sm:h-44 md:w-48 md:h-48 lg:w-52 lg:h-52 rounded-full font-medium text-base sm:text-lg transition-all duration-300 shadow-2xl hover:scale-105 active:scale-95 flex flex-col items-center justify-center"
                 style={{
                   background: "#bae8e8",
                   color: "#272343",
@@ -174,8 +175,8 @@ export default function LandingPage() {
                     "0 25px 50px -12px rgba(186, 232, 232, 0.4)";
                 }}
               >
-                <span className="text-xl">Book Your</span>
-                <span className="text-xl">Journey</span>
+                <span className="text-lg sm:text-xl">Book Your</span>
+                <span className="text-lg sm:text-xl">Journey</span>
               </button>
             </div>
           </div>
@@ -183,24 +184,24 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section - Minimalist Redesign */}
-      <section className="py-32 bg-white">
+      <section className="py-16 sm:py-24 md:py-32 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-20">
+          <div className="text-center mb-12 sm:mb-16 md:mb-20">
             <h2
-              className="text-5xl font-light mb-6"
+              className="text-3xl sm:text-4xl md:text-5xl font-light mb-4 sm:mb-6"
               style={{ color: "#272343", letterSpacing: "-0.02em" }}
             >
               Why Choose Voyager?
             </h2>
             <p
-              className="text-lg max-w-xl mx-auto font-light"
+              className="text-base sm:text-lg max-w-xl mx-auto font-light px-4"
               style={{ color: "#272343", opacity: 0.6 }}
             >
               Experience seamless ferry booking designed for modern travelers
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-12 sm:gap-x-8 sm:gap-y-16">
             {[
               {
                 icon: Zap,
@@ -265,24 +266,24 @@ export default function LandingPage() {
       </section>
 
       {/* How It Works Section - Minimalist Redesign */}
-      <section className="py-32" style={{ background: "#e3f6f5" }}>
+      <section className="py-16 sm:py-24 md:py-32" style={{ background: "#e3f6f5" }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-24">
+          <div className="text-center mb-12 sm:mb-16 md:mb-24">
             <h2
-              className="text-5xl font-light mb-6"
+              className="text-3xl sm:text-4xl md:text-5xl font-light mb-4 sm:mb-6"
               style={{ color: "#272343", letterSpacing: "-0.02em" }}
             >
               Book in 3 Simple Steps
             </h2>
             <p
-              className="text-lg font-light"
+              className="text-base sm:text-lg font-light px-4"
               style={{ color: "#272343", opacity: 0.6 }}
             >
               Getting on board has never been easier
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-16">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-12 sm:gap-14 md:gap-16">
             {[
               {
                 step: "01",
@@ -342,33 +343,33 @@ export default function LandingPage() {
       </section>
 
       {/* Search and Routes Section - Minimalist Redesign */}
-      <section id="search-routes" className="py-32 bg-white">
+      <section id="search-routes" className="py-16 sm:py-24 md:py-32 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Search Box */}
           <div
-            className="bg-white rounded-3xl p-10 mb-20"
+            className="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10 mb-12 sm:mb-16 md:mb-20"
             style={{
               borderWidth: "1px",
               borderColor: "#bae8e8",
               boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.1)",
             }}
           >
-            <div className="text-center mb-10">
+            <div className="text-center mb-8 sm:mb-10">
               <h2
-                className="text-5xl font-light mb-4"
+                className="text-3xl sm:text-4xl md:text-5xl font-light mb-3 sm:mb-4"
                 style={{ color: "#272343", letterSpacing: "-0.02em" }}
               >
                 Find Your Perfect Route
               </h2>
               <p
-                className="font-light"
+                className="text-sm sm:text-base font-light"
                 style={{ color: "#272343", opacity: 0.6 }}
               >
                 Search from {routes.length} available routes
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               {/* Search */}
               <div className="relative">
                 <Search
@@ -490,11 +491,11 @@ export default function LandingPage() {
 
           {/* Routes Grid */}
           <div>
-            <div className="flex items-center justify-between mb-12">
-              <h3 className="text-3xl font-light" style={{ color: "#272343" }}>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 sm:mb-12">
+              <h3 className="text-2xl sm:text-3xl font-light" style={{ color: "#272343" }}>
                 Available Routes
                 <span
-                  className="ml-3 font-light"
+                  className="ml-2 sm:ml-3 font-light text-xl sm:text-3xl"
                   style={{ color: "#272343", opacity: 0.4 }}
                 >
                   ({filteredRoutes.length})
@@ -502,10 +503,10 @@ export default function LandingPage() {
               </h3>
               {filteredRoutes.length > 0 && (
                 <div
-                  className="flex items-center gap-2 text-sm font-light"
+                  className="flex items-center gap-2 text-xs sm:text-sm font-light"
                   style={{ color: "#272343", opacity: 0.5 }}
                 >
-                  <TrendingUp className="w-4 h-4" />
+                  <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4" />
                   <span>Most popular</span>
                 </div>
               )}
@@ -513,28 +514,28 @@ export default function LandingPage() {
 
             {filteredRoutes.length === 0 ? (
               <div
-                className="text-center py-24 bg-white rounded-3xl"
+                className="text-center py-16 sm:py-20 md:py-24 bg-white rounded-2xl sm:rounded-3xl"
                 style={{ borderWidth: "1px", borderColor: "#bae8e8" }}
               >
                 <Ship
-                  className="w-16 h-16 mx-auto mb-4"
+                  className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4"
                   style={{ color: "#272343", opacity: 0.2 }}
                 />
                 <p
-                  className="text-xl font-medium mb-2"
+                  className="text-lg sm:text-xl font-medium mb-2"
                   style={{ color: "#272343" }}
                 >
                   No routes found
                 </p>
                 <p
-                  className="font-light"
+                  className="text-sm sm:text-base font-light px-4"
                   style={{ color: "#272343", opacity: 0.6 }}
                 >
                   Try adjusting your search filters
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
                 {filteredRoutes.map((route) => (
                   <div
                     key={route.id}
@@ -552,10 +553,10 @@ export default function LandingPage() {
                         background: "#e3f6f5",
                       }}
                     >
-                      {route.vessel?.image ? (
+                      {(route.vessel?.image || getVesselImage(route.vessel?.name)) ? (
                         <img
-                          src={route.vessel.image}
-                          alt={route.vessel.name}
+                          src={(route.vessel?.image || getVesselImage(route.vessel?.name)) || ''}
+                          alt={route.vessel?.name || 'Ferry'}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                         />
                       ) : (
@@ -691,28 +692,28 @@ export default function LandingPage() {
 
       {/* Trust & Social Proof Section - Minimalist Redesign */}
       <section
-        className="py-32"
+        className="py-16 sm:py-24 md:py-32"
         style={{
           background: "#e3f6f5",
         }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-20">
+          <div className="text-center mb-12 sm:mb-16 md:mb-20">
             <h2
-              className="text-5xl font-light mb-6"
+              className="text-3xl sm:text-4xl md:text-5xl font-light mb-4 sm:mb-6"
               style={{ color: "#272343", letterSpacing: "-0.02em" }}
             >
               Trusted by Thousands
             </h2>
             <p
-              className="text-lg font-light"
+              className="text-base sm:text-lg font-light px-4"
               style={{ color: "#272343", opacity: 0.6 }}
             >
               Join our growing community of satisfied customers
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 mb-24">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 mb-16 sm:mb-20 md:mb-24">
             {[
               {
                 quote:
@@ -766,24 +767,24 @@ export default function LandingPage() {
           </div>
 
           {/* CTA */}
-          <div className="text-center max-w-3xl mx-auto">
+          <div className="text-center max-w-3xl mx-auto px-4">
             <h3
-              className="text-4xl font-light mb-6"
+              className="text-2xl sm:text-3xl md:text-4xl font-light mb-4 sm:mb-6"
               style={{ color: "#272343", letterSpacing: "-0.02em" }}
             >
               Ready to Start Your Journey?
             </h3>
             <p
-              className="text-lg mb-10 font-light"
+              className="text-base sm:text-lg mb-8 sm:mb-10 font-light"
               style={{ color: "#272343", opacity: 0.6 }}
             >
               Join thousands of travelers who trust Voyager for their ferry
               bookings
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4">
               <button
                 onClick={() => navigate("/register")}
-                className="px-10 py-4 bg-white rounded-xl font-medium transition-all duration-200 flex items-center gap-2 group"
+                className="w-full sm:w-auto px-8 sm:px-10 py-3 sm:py-4 bg-white rounded-xl font-medium transition-all duration-200 flex items-center justify-center gap-2 group"
                 style={{
                   background: "#272343",
                   color: "#ffffff",
@@ -801,7 +802,7 @@ export default function LandingPage() {
               </button>
               <button
                 onClick={() => navigate("/login")}
-                className="px-10 py-4 text-white rounded-xl font-medium transition-all duration-200"
+                className="w-full sm:w-auto px-8 sm:px-10 py-3 sm:py-4 text-white rounded-xl font-medium transition-all duration-200 flex items-center justify-center"
                 style={{
                   background: "#bae8e8",
                   color: "#272343",
@@ -825,14 +826,14 @@ export default function LandingPage() {
 
       {/* Footer - Minimalist Redesign */}
       <footer
-        className="py-20"
+        className="py-12 sm:py-16 md:py-20"
         style={{
           background: "#272343",
           color: "#ffffff",
         }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 mb-16">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-12 md:gap-16 mb-12 sm:mb-16">
             {/* Company Info */}
             <div>
               <div className="flex items-center gap-2 mb-6">
@@ -979,23 +980,23 @@ export default function LandingPage() {
 
           {/* Bottom Bar */}
           <div
-            className="pt-8"
+            className="pt-6 sm:pt-8"
             style={{ borderTop: "1px solid rgba(255, 255, 255, 0.1)" }}
           >
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <p
-                className="text-sm font-light"
+                className="text-xs sm:text-sm font-light text-center md:text-left"
                 style={{ color: "#ffffff", opacity: 0.4 }}
               >
                 © 2024 Voyager Ferry Booking. All rights reserved.
               </p>
-              <div className="flex gap-6 text-sm font-light">
+              <div className="flex flex-wrap justify-center gap-4 sm:gap-6 text-xs sm:text-sm font-light">
                 {["Terms of Service", "Privacy Policy", "Cookie Policy"].map(
                   (link) => (
                     <a
                       key={link}
                       href="#"
-                      className="transition-opacity"
+                      className="transition-opacity whitespace-nowrap"
                       style={{ color: "#ffffff", opacity: 0.4 }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.opacity = "1";
