@@ -6,6 +6,7 @@ import { routeService } from '../../services/route';
 import type { Route } from '../../types/route';
 import Layout from '../../components/layout/Layout';
 import { useDebounce } from '../../hooks/useDebounce';
+import { getVesselImage } from '../../utils/vesselImages';
 
 export default function BrowseRoutesPage() {
   const navigate = useNavigate();
@@ -311,10 +312,10 @@ export default function BrowseRoutesPage() {
                       background: '#e3f6f5',
                     }}
                   >
-                    {route.vessel?.image ? (
+                    {(route.vessel?.image || getVesselImage(route.vessel?.name)) ? (
                       <img
-                        src={route.vessel.image}
-                        alt={route.vessel.name}
+                        src={(route.vessel?.image || getVesselImage(route.vessel?.name)) || ''}
+                        alt={route.vessel?.name || 'Ferry'}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                       />
                     ) : (
