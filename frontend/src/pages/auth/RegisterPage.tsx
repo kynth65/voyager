@@ -90,24 +90,24 @@ export default function RegisterPage() {
       <Navbar transparent={false} showAuthButtons={true} />
 
       {/* Main Content */}
-      <div className="flex-1 flex items-center justify-center py-24 px-4 sm:px-6 lg:px-8">
+      <div className="flex-1 flex items-center justify-center py-20 sm:py-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-2xl w-full">
           {/* Header */}
           <div className="text-center">
             <div
-              className="mx-auto h-16 w-16 flex items-center justify-center rounded-2xl shadow-lg"
+              className="mx-auto h-14 w-14 sm:h-16 sm:w-16 flex items-center justify-center rounded-xl sm:rounded-2xl shadow-lg"
               style={{ background: "#272343" }}
             >
-              <Ship className="h-8 w-8 text-white" />
+              <Ship className="h-7 w-7 sm:h-8 sm:w-8 text-white" />
             </div>
             <h2
-              className="mt-6 text-3xl font-light tracking-tight"
+              className="mt-5 sm:mt-6 text-2xl sm:text-3xl font-light tracking-tight"
               style={{ color: "#272343", letterSpacing: "-0.02em" }}
             >
               Create your account
             </h2>
             <p
-              className="mt-2 text-sm font-light"
+              className="mt-2 text-sm font-light px-4"
               style={{ color: "#272343", opacity: 0.6 }}
             >
               Join Voyager and start managing your travel bookings
@@ -116,7 +116,7 @@ export default function RegisterPage() {
 
           {/* Form Card */}
           <div
-            className="mt-8 bg-white py-8 px-6 sm:px-8 rounded-3xl"
+            className="mt-6 sm:mt-8 bg-white py-6 sm:py-8 px-5 sm:px-6 md:px-8 rounded-2xl sm:rounded-3xl"
             style={{
               boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
               borderWidth: "1px",
@@ -126,7 +126,7 @@ export default function RegisterPage() {
             {/* Pending Booking Notice */}
             {pendingBooking && (
               <div
-                className="rounded-xl p-4 mb-6 flex items-start space-x-3"
+                className="rounded-lg sm:rounded-xl p-3 sm:p-4 mb-5 sm:mb-6 flex items-start gap-2 sm:gap-3"
                 style={{
                   background: "#e3f6f5",
                   borderWidth: "1px",
@@ -134,18 +134,18 @@ export default function RegisterPage() {
                 }}
               >
                 <Ship
-                  className="h-5 w-5 flex-shrink-0 mt-0.5"
+                  className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 mt-0.5"
                   style={{ color: "#272343" }}
                 />
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <p
-                    className="text-sm font-medium mb-1"
+                    className="text-xs sm:text-sm font-medium mb-1"
                     style={{ color: "#272343" }}
                   >
                     Booking in Progress
                   </p>
                   <p
-                    className="text-sm font-light"
+                    className="text-xs sm:text-sm font-light break-words"
                     style={{ color: "#272343", opacity: 0.7 }}
                   >
                     Complete registration to finalize your ferry booking from{" "}
@@ -156,24 +156,24 @@ export default function RegisterPage() {
               </div>
             )}
 
-            <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
+            <form className="space-y-5 sm:space-y-6" onSubmit={handleSubmit(onSubmit)}>
               {/* Error Alert */}
               {error && (
                 <div
-                  className="rounded-xl p-4 flex items-start space-x-3"
+                  className="rounded-lg sm:rounded-xl p-3 sm:p-4 flex items-start gap-2 sm:gap-3"
                   style={{
                     background: "#fee2e2",
                     borderWidth: "1px",
                     borderColor: "#fecaca",
                   }}
                 >
-                  <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
-                  <p className="text-sm text-red-800 font-light">{error}</p>
+                  <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-600 flex-shrink-0 mt-0.5" />
+                  <p className="text-xs sm:text-sm text-red-800 font-light break-words">{error}</p>
                 </div>
               )}
 
               {/* First Name & Last Name */}
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-5 sm:gap-6 sm:grid-cols-2">
                 <div>
                   <label
                     htmlFor="first_name"
@@ -363,7 +363,7 @@ export default function RegisterPage() {
               </div>
 
               {/* Password & Confirm Password */}
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-5 sm:gap-6 sm:grid-cols-2">
                 <div>
                   <label
                     htmlFor="password"
@@ -471,7 +471,7 @@ export default function RegisterPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full flex justify-center items-center py-3 px-4 border-transparent rounded-xl font-medium text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full flex justify-center items-center py-3 sm:py-3.5 px-4 border-transparent rounded-lg sm:rounded-xl font-medium text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
                 style={{
                   background: "#272343",
                   fontSize: "15px",
@@ -523,13 +523,13 @@ export default function RegisterPage() {
 
           {/* Footer */}
           <p
-            className="mt-6 text-center text-sm font-light"
+            className="mt-5 sm:mt-6 text-center text-xs sm:text-sm font-light px-2"
             style={{ color: "#272343", opacity: 0.7 }}
           >
             Already have an account?{" "}
             <Link
               to="/login"
-              className="font-medium transition-colors"
+              className="font-medium transition-colors inline-block"
               style={{ color: "#272343" }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.opacity = "0.7";
