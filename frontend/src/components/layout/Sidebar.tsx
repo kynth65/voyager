@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Ship } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -12,21 +11,8 @@ interface SidebarProps {
 export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
   const { user } = useAuth();
   const location = useLocation();
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['Dashboard']));
 
   const navigation: NavGroup[] = user ? getNavigationForRole(user.role) : [];
-
-  const toggleGroup = (groupLabel: string) => {
-    setExpandedGroups((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(groupLabel)) {
-        newSet.delete(groupLabel);
-      } else {
-        newSet.add(groupLabel);
-      }
-      return newSet;
-    });
-  };
 
   const isActiveLink = (href: string) => {
     return location.pathname === href;
@@ -124,98 +110,91 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
             scrollbarColor: '#bae8e8 #ffffff',
           }}
         >
-          <div className="space-y-6">
-            {navigation.map((group) => (
+          <div className="space-y-1">
+            {navigation.map((group, groupIndex) => (
               <div key={group.label}>
-                {/* Group Label */}
+                {/* Group Label - Non-interactive, just visual separator */}
                 {isOpen && (
-                  <button
-                    onClick={() => toggleGroup(group.label)}
-                    className="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold uppercase tracking-wider transition-all"
+                  <div
+                    className={`px-3 text-xs font-semibold uppercase tracking-wider ${
+                      groupIndex === 0 ? 'pt-0 pb-2' : 'pt-4 pb-2'
+                    }`}
                     style={{
                       color: '#272343',
                       opacity: 0.4,
                       letterSpacing: '0.05em',
                     }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.opacity = '0.7';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.opacity = '0.4';
-                    }}
                   >
-                    <span>{group.label}</span>
-                    <ChevronRight
-                      className={`h-4 w-4 transition-transform ${
-                        expandedGroups.has(group.label) ? 'rotate-90' : ''
-                      }`}
-                    />
-                  </button>
-                )}
-
-                {/* Group Items */}
-                {(isOpen ? expandedGroups.has(group.label) : true) && (
-                  <div className="space-y-1">
-                    {group.items.map((item) => {
-                      const Icon = item.icon;
-                      const active = isActiveLink(item.href);
-
-                      return (
-                        <Link
-                          key={item.href}
-                          to={item.href}
-                          className={`
-                            flex items-center px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
-                            ${!isOpen ? 'justify-center' : ''}
-                          `}
-                          style={
-                            active
-                              ? {
-                                  backgroundColor: '#272343',
-                                  color: '#ffffff',
-                                  boxShadow: '0 4px 6px -1px rgba(39, 35, 67, 0.2)',
-                                }
-                              : {
-                                  color: '#272343',
-                                  opacity: 0.6,
-                                }
-                          }
-                          title={!isOpen ? item.label : undefined}
-                          onMouseEnter={(e) => {
-                            if (!active) {
-                              e.currentTarget.style.backgroundColor = '#e3f6f5';
-                              e.currentTarget.style.opacity = '1';
-                            }
-                          }}
-                          onMouseLeave={(e) => {
-                            if (!active) {
-                              e.currentTarget.style.backgroundColor = 'transparent';
-                              e.currentTarget.style.opacity = '0.6';
-                            }
-                          }}
-                        >
-                          <Icon className={`h-5 w-5 ${isOpen ? 'mr-3' : ''}`} />
-                          {isOpen && (
-                            <>
-                              <span className="flex-1">{item.label}</span>
-                              {item.badge && (
-                                <span
-                                  className="ml-auto inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
-                                  style={{
-                                    backgroundColor: active ? '#ffffff20' : '#e3f6f5',
-                                    color: active ? '#ffffff' : '#272343',
-                                  }}
-                                >
-                                  {item.badge}
-                                </span>
-                              )}
-                            </>
-                          )}
-                        </Link>
-                      );
-                    })}
+                    {group.label}
                   </div>
                 )}
+
+                {/* Divider for collapsed mode */}
+                {!isOpen && groupIndex > 0 && (
+                  <div className="h-px my-2 mx-2" style={{ backgroundColor: '#e3f6f5' }} />
+                )}
+
+                {/* Group Items - Always visible */}
+                <div className="space-y-1">
+                  {group.items.map((item) => {
+                    const Icon = item.icon;
+                    const active = isActiveLink(item.href);
+
+                    return (
+                      <Link
+                        key={item.href}
+                        to={item.href}
+                        className={`
+                          flex items-center px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
+                          ${!isOpen ? 'justify-center' : ''}
+                        `}
+                        style={
+                          active
+                            ? {
+                                backgroundColor: '#272343',
+                                color: '#ffffff',
+                                boxShadow: '0 4px 6px -1px rgba(39, 35, 67, 0.2)',
+                              }
+                            : {
+                                color: '#272343',
+                                opacity: 0.6,
+                              }
+                        }
+                        title={!isOpen ? item.label : undefined}
+                        onMouseEnter={(e) => {
+                          if (!active) {
+                            e.currentTarget.style.backgroundColor = '#e3f6f5';
+                            e.currentTarget.style.opacity = '1';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!active) {
+                            e.currentTarget.style.backgroundColor = 'transparent';
+                            e.currentTarget.style.opacity = '0.6';
+                          }
+                        }}
+                      >
+                        <Icon className={`h-5 w-5 ${isOpen ? 'mr-3' : ''}`} />
+                        {isOpen && (
+                          <>
+                            <span className="flex-1">{item.label}</span>
+                            {item.badge && (
+                              <span
+                                className="ml-auto inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
+                                style={{
+                                  backgroundColor: active ? '#ffffff20' : '#e3f6f5',
+                                  color: active ? '#ffffff' : '#272343',
+                                }}
+                              >
+                                {item.badge}
+                              </span>
+                            )}
+                          </>
+                        )}
+                      </Link>
+                    );
+                  })}
+                </div>
               </div>
             ))}
           </div>
