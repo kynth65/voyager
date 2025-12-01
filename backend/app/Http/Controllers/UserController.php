@@ -195,57 +195,6 @@ class UserController extends Controller
     }
 
     /**
-     * Assign a role to a user.
-     */
-    public function assignRole(Request $request, User $user)
-    {
-        $validated = $request->validate([
-            'role' => ['required', Rule::in(['super_admin', 'company_admin', 'agent', 'customer'])],
-        ]);
-
-        $success = $user->assignRole($validated['role']);
-
-        if (!$success) {
-            return response()->json([
-                'message' => 'Failed to assign role.',
-            ], 400);
-        }
-
-        return response()->json([
-            'message' => 'Role assigned successfully.',
-            'user' => $user->fresh(),
-        ]);
-    }
-
-    /**
-     * Get user's permissions.
-     */
-    public function permissions(User $user)
-    {
-        return response()->json([
-            'role' => $user->role,
-            'permissions' => $user->getPermissions(),
-        ]);
-    }
-
-    /**
-     * Check if user has a specific permission.
-     */
-    public function checkPermission(Request $request, User $user)
-    {
-        $validated = $request->validate([
-            'permission' => 'required|string',
-        ]);
-
-        $hasPermission = $user->hasPermission($validated['permission']);
-
-        return response()->json([
-            'permission' => $validated['permission'],
-            'has_permission' => $hasPermission,
-        ]);
-    }
-
-    /**
      * Get current user's profile.
      */
     public function profile(Request $request)
