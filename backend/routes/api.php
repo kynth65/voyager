@@ -11,8 +11,6 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\VesselController;
 use App\Http\Controllers\RouteController;
-use App\Http\Controllers\SupplierController;
-use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ReportController;
@@ -51,9 +49,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('users', UserController::class);
         Route::post('users/{id}/restore', [UserController::class, 'restore']);
         Route::delete('users/{id}/force', [UserController::class, 'forceDelete']);
-        Route::post('users/{user}/assign-role', [UserController::class, 'assignRole']);
-        Route::get('users/{user}/permissions', [UserController::class, 'permissions']);
-        Route::post('users/{user}/check-permission', [UserController::class, 'checkPermission']);
     });
 
     // Vessel Management (superadmin only - write operations)
@@ -112,17 +107,4 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('reports/revenue', [ReportController::class, 'generateRevenueReport']);
         Route::get('reports/routes/popular', [ReportController::class, 'generatePopularRoutesReport']);
     });
-
-    // Suppliers (superadmin and admin can manage)
-    Route::middleware('role:superadmin,admin')->group(function () {
-        Route::post('suppliers', [SupplierController::class, 'store']);
-        Route::put('suppliers/{supplier}', [SupplierController::class, 'update']);
-        Route::delete('suppliers/{supplier}', [SupplierController::class, 'destroy']);
-    });
-    Route::get('suppliers', [SupplierController::class, 'index']);
-    Route::get('suppliers/{supplier}', [SupplierController::class, 'show']);
-
-    // Documents
-    Route::apiResource('documents', DocumentController::class);
-    Route::post('documents/upload', [DocumentController::class, 'upload']);
 });
