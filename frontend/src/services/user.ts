@@ -6,10 +6,6 @@ import type {
   UserListParams,
   UserListResponse,
   UserResponse,
-  AssignRoleRequest,
-  UserPermissionsResponse,
-  CheckPermissionRequest,
-  CheckPermissionResponse,
 } from '../types/user';
 
 /**
@@ -70,35 +66,5 @@ export async function forceDeleteUser(
   const response = await axios.delete<{ message: string }>(`/users/${id}/force`, {
     data: { confirmation },
   });
-  return response.data;
-}
-
-/**
- * Assign a role to a user
- */
-export async function assignRole(id: string, data: AssignRoleRequest): Promise<UserResponse> {
-  const response = await axios.post<UserResponse>(`/users/${id}/assign-role`, data);
-  return response.data;
-}
-
-/**
- * Get user's permissions
- */
-export async function getUserPermissions(id: string): Promise<UserPermissionsResponse> {
-  const response = await axios.get<UserPermissionsResponse>(`/users/${id}/permissions`);
-  return response.data;
-}
-
-/**
- * Check if user has a specific permission
- */
-export async function checkUserPermission(
-  id: string,
-  data: CheckPermissionRequest
-): Promise<CheckPermissionResponse> {
-  const response = await axios.post<CheckPermissionResponse>(
-    `/users/${id}/check-permission`,
-    data
-  );
   return response.data;
 }

@@ -50,21 +50,3 @@ export interface UserResponse {
   message: string;
   user: User;
 }
-
-export interface AssignRoleRequest {
-  role: 'superadmin' | 'admin' | 'agent' | 'customer';
-}
-
-export interface UserPermissionsResponse {
-  role: string;
-  permissions: string[];
-}
-
-export interface CheckPermissionRequest {
-  permission: string;
-}
-
-export interface CheckPermissionResponse {
-  permission: string;
-  has_permission: boolean;
-}
