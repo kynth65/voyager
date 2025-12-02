@@ -35,7 +35,7 @@ export default function LandingPage() {
   const [selectedDestination, setSelectedDestination] = useState("");
 
   // Fetch all routes
-  const { data, isLoading, error } = useQuery({
+  const { data } = useQuery({
     queryKey: ["routes", { status: "active" }],
     queryFn: () => routeService.getRoutes({ status: "active", per_page: 100 }),
   });
@@ -68,38 +68,6 @@ export default function LandingPage() {
     // Navigate directly to booking page - no login required
     navigate(`/booking/${route.id}`);
   };
-
-  if (isLoading) {
-    return (
-      <div
-        className="min-h-screen flex items-center justify-center"
-        style={{ background: "#e3f6f5" }}
-      >
-        <div className="text-center">
-          <Ship
-            className="w-16 h-16 animate-bounce mx-auto mb-4"
-            style={{ color: "#272343" }}
-          />
-          <p className="text-lg" style={{ color: "#272343" }}>
-            Loading your adventure...
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div
-        className="min-h-screen flex items-center justify-center"
-        style={{ background: "#e3f6f5" }}
-      >
-        <div className="text-center text-red-600">
-          <p>Error loading routes. Please try again later.</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -144,7 +112,7 @@ export default function LandingPage() {
 
               <p
                 className="text-sm sm:text-base max-w-lg mx-auto md:mx-0 animate-fade-in-up delay-200"
-                style={{ color: "#e3f6f5" }}
+                style={{ color: "#ffffff" }}
               >
                 Experience seamless accommodations, world-class amenities, and
                 unforgettable moments on the beautiful islands of the
@@ -195,7 +163,7 @@ export default function LandingPage() {
             </h2>
             <p
               className="text-base sm:text-lg max-w-xl mx-auto font-light px-4"
-              style={{ color: "#272343", opacity: 0.6 }}
+              style={{ color: "#5d576b" }}
             >
               Experience seamless ferry booking designed for modern travelers
             </p>
@@ -255,7 +223,7 @@ export default function LandingPage() {
                 </h3>
                 <p
                   className="leading-relaxed font-light"
-                  style={{ color: "#272343", opacity: 0.6, fontSize: "15px" }}
+                  style={{ color: "#5d576b", fontSize: "15px" }}
                 >
                   {feature.description}
                 </p>
@@ -266,7 +234,10 @@ export default function LandingPage() {
       </section>
 
       {/* How It Works Section - Minimalist Redesign */}
-      <section className="py-16 sm:py-24 md:py-32" style={{ background: "#e3f6f5" }}>
+      <section
+        className="py-16 sm:py-24 md:py-32"
+        style={{ background: "#e3f6f5" }}
+      >
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12 sm:mb-16 md:mb-24">
             <h2
@@ -277,7 +248,7 @@ export default function LandingPage() {
             </h2>
             <p
               className="text-base sm:text-lg font-light px-4"
-              style={{ color: "#272343", opacity: 0.6 }}
+              style={{ color: "#5d576b" }}
             >
               Getting on board has never been easier
             </p>
@@ -332,7 +303,7 @@ export default function LandingPage() {
                 </h3>
                 <p
                   className="leading-relaxed font-light"
-                  style={{ color: "#272343", opacity: 0.6, fontSize: "15px" }}
+                  style={{ color: "#5d576b", fontSize: "15px" }}
                 >
                   {step.description}
                 </p>
@@ -363,7 +334,7 @@ export default function LandingPage() {
               </h2>
               <p
                 className="text-sm sm:text-base font-light"
-                style={{ color: "#272343", opacity: 0.6 }}
+                style={{ color: "#5d576b" }}
               >
                 Search from {routes.length} available routes
               </p>
@@ -492,11 +463,14 @@ export default function LandingPage() {
           {/* Routes Grid */}
           <div>
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 sm:mb-12">
-              <h3 className="text-2xl sm:text-3xl font-light" style={{ color: "#272343" }}>
+              <h3
+                className="text-2xl sm:text-3xl font-light"
+                style={{ color: "#272343" }}
+              >
                 Available Routes
                 <span
                   className="ml-2 sm:ml-3 font-light text-xl sm:text-3xl"
-                  style={{ color: "#272343", opacity: 0.4 }}
+                  style={{ color: "#8a8494" }}
                 >
                   ({filteredRoutes.length})
                 </span>
@@ -504,7 +478,7 @@ export default function LandingPage() {
               {filteredRoutes.length > 0 && (
                 <div
                   className="flex items-center gap-2 text-xs sm:text-sm font-light"
-                  style={{ color: "#272343", opacity: 0.5 }}
+                  style={{ color: "#5d576b" }}
                 >
                   <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4" />
                   <span>Most popular</span>
@@ -529,7 +503,7 @@ export default function LandingPage() {
                 </p>
                 <p
                   className="text-sm sm:text-base font-light px-4"
-                  style={{ color: "#272343", opacity: 0.6 }}
+                  style={{ color: "#5d576b" }}
                 >
                   Try adjusting your search filters
                 </p>
@@ -553,10 +527,15 @@ export default function LandingPage() {
                         background: "#e3f6f5",
                       }}
                     >
-                      {(route.vessel?.image || getVesselImage(route.vessel?.name)) ? (
+                      {route.vessel?.image ||
+                      getVesselImage(route.vessel?.name) ? (
                         <img
-                          src={(route.vessel?.image || getVesselImage(route.vessel?.name)) || ''}
-                          alt={route.vessel?.name || 'Ferry'}
+                          src={
+                            route.vessel?.image ||
+                            getVesselImage(route.vessel?.name) ||
+                            ""
+                          }
+                          alt={route.vessel?.name || "Ferry"}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                         />
                       ) : (
@@ -576,7 +555,7 @@ export default function LandingPage() {
                         </span>
                         <span
                           className="text-xs ml-1 font-light"
-                          style={{ color: "#272343", opacity: 0.5 }}
+                          style={{ color: "#5d576b" }}
                         >
                           / person
                         </span>
@@ -633,12 +612,11 @@ export default function LandingPage() {
                         <div
                           className="flex items-center gap-3 font-light"
                           style={{
-                            color: "#272343",
-                            opacity: 0.6,
+                            color: "#5d576b",
                             fontSize: "15px",
                           }}
                         >
-                          <Clock className="w-4 h-4" style={{ opacity: 0.6 }} />
+                          <Clock className="w-4 h-4" />
                           <span>{route.duration} minutes</span>
                         </div>
 
@@ -647,15 +625,11 @@ export default function LandingPage() {
                           <div
                             className="flex items-center gap-3 font-light"
                             style={{
-                              color: "#272343",
-                              opacity: 0.6,
+                              color: "#5d576b",
                               fontSize: "15px",
                             }}
                           >
-                            <Users
-                              className="w-4 h-4"
-                              style={{ opacity: 0.6 }}
-                            />
+                            <Users className="w-4 h-4" />
                             <span>
                               Up to {route.vessel.capacity} passengers
                             </span>
@@ -707,7 +681,7 @@ export default function LandingPage() {
             </h2>
             <p
               className="text-base sm:text-lg font-light px-4"
-              style={{ color: "#272343", opacity: 0.6 }}
+              style={{ color: "#5d576b" }}
             >
               Join our growing community of satisfied customers
             </p>
@@ -744,7 +718,7 @@ export default function LandingPage() {
               >
                 <p
                   className="text-lg mb-8 leading-relaxed font-light"
-                  style={{ color: "#272343", opacity: 0.8 }}
+                  style={{ color: "#3d3851" }}
                 >
                   "{testimonial.quote}"
                 </p>
@@ -757,7 +731,7 @@ export default function LandingPage() {
                   </div>
                   <div
                     className="text-sm font-light"
-                    style={{ color: "#272343", opacity: 0.5 }}
+                    style={{ color: "#5d576b" }}
                   >
                     {testimonial.role}
                   </div>
@@ -776,7 +750,7 @@ export default function LandingPage() {
             </h3>
             <p
               className="text-base sm:text-lg mb-8 sm:mb-10 font-light"
-              style={{ color: "#272343", opacity: 0.6 }}
+              style={{ color: "#5d576b" }}
             >
               Join thousands of travelers who trust Voyager for their ferry
               bookings
@@ -842,7 +816,7 @@ export default function LandingPage() {
               </div>
               <p
                 className="mb-8 leading-relaxed font-light"
-                style={{ color: "#ffffff", opacity: 0.5, fontSize: "15px" }}
+                style={{ color: "#bae8e8", fontSize: "15px" }}
               >
                 Your trusted partner for seamless ferry bookings and
                 unforgettable journeys.
@@ -865,10 +839,7 @@ export default function LandingPage() {
                         "rgba(255, 255, 255, 0.05)";
                     }}
                   >
-                    <Icon
-                      className="w-4 h-4"
-                      style={{ color: "#ffffff", opacity: 0.7 }}
-                    />
+                    <Icon className="w-4 h-4" style={{ color: "#bae8e8" }} />
                   </a>
                 ))}
               </div>
@@ -883,17 +854,16 @@ export default function LandingPage() {
                     <li key={link}>
                       <a
                         href="#"
-                        className="transition-opacity font-light"
+                        className="transition-colors font-light"
                         style={{
-                          color: "#ffffff",
-                          opacity: 0.5,
+                          color: "#bae8e8",
                           fontSize: "15px",
                         }}
                         onMouseEnter={(e) => {
-                          e.currentTarget.style.opacity = "1";
+                          e.currentTarget.style.color = "#ffffff";
                         }}
                         onMouseLeave={(e) => {
-                          e.currentTarget.style.opacity = "0.5";
+                          e.currentTarget.style.color = "#bae8e8";
                         }}
                       >
                         {link}
@@ -918,17 +888,16 @@ export default function LandingPage() {
                   <li key={link}>
                     <a
                       href="#"
-                      className="transition-opacity font-light"
+                      className="transition-colors font-light"
                       style={{
-                        color: "#ffffff",
-                        opacity: 0.5,
+                        color: "#bae8e8",
                         fontSize: "15px",
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.opacity = "1";
+                        e.currentTarget.style.color = "#ffffff";
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.opacity = "0.5";
+                        e.currentTarget.style.color = "#bae8e8";
                       }}
                     >
                       {link}
@@ -945,13 +914,13 @@ export default function LandingPage() {
                 <li>
                   <a
                     href="mailto:support@voyager.com"
-                    className="flex items-center gap-3 transition-opacity font-light"
-                    style={{ color: "#ffffff", opacity: 0.5, fontSize: "15px" }}
+                    className="flex items-center gap-3 transition-colors font-light"
+                    style={{ color: "#bae8e8", fontSize: "15px" }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.opacity = "1";
+                      e.currentTarget.style.color = "#ffffff";
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.opacity = "0.5";
+                      e.currentTarget.style.color = "#bae8e8";
                     }}
                   >
                     <Mail className="w-4 h-4" />
@@ -961,13 +930,13 @@ export default function LandingPage() {
                 <li>
                   <a
                     href="tel:+1234567890"
-                    className="flex items-center gap-3 transition-opacity font-light"
-                    style={{ color: "#ffffff", opacity: 0.5, fontSize: "15px" }}
+                    className="flex items-center gap-3 transition-colors font-light"
+                    style={{ color: "#bae8e8", fontSize: "15px" }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.opacity = "1";
+                      e.currentTarget.style.color = "#ffffff";
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.opacity = "0.5";
+                      e.currentTarget.style.color = "#bae8e8";
                     }}
                   >
                     <Phone className="w-4 h-4" />
@@ -986,7 +955,7 @@ export default function LandingPage() {
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <p
                 className="text-xs sm:text-sm font-light text-center md:text-left"
-                style={{ color: "#ffffff", opacity: 0.4 }}
+                style={{ color: "#8a8494" }}
               >
                 © 2024 Voyager Ferry Booking. All rights reserved.
               </p>
@@ -996,13 +965,13 @@ export default function LandingPage() {
                     <a
                       key={link}
                       href="#"
-                      className="transition-opacity whitespace-nowrap"
-                      style={{ color: "#ffffff", opacity: 0.4 }}
+                      className="transition-colors whitespace-nowrap"
+                      style={{ color: "#8a8494" }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.opacity = "1";
+                        e.currentTarget.style.color = "#ffffff";
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.opacity = "0.4";
+                        e.currentTarget.style.color = "#8a8494";
                       }}
                     >
                       {link}
