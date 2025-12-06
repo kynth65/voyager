@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import {
@@ -35,6 +35,62 @@ export default function LandingPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedOrigin, setSelectedOrigin] = useState("");
   const [selectedDestination, setSelectedDestination] = useState("");
+
+  // Refs for drag scrolling
+  const routesScrollRef = useRef<HTMLDivElement>(null);
+  const testimonialsScrollRef = useRef<HTMLDivElement>(null);
+
+  // Drag to scroll functionality
+  const useDragScroll = (ref: React.RefObject<HTMLDivElement | null>) => {
+    const [isDragging, setIsDragging] = useState(false);
+    const [startX, setStartX] = useState(0);
+    const [scrollLeft, setScrollLeft] = useState(0);
+
+    const handleMouseDown = (e: React.MouseEvent) => {
+      if (!ref.current) return;
+      setIsDragging(true);
+      setStartX(e.pageX - ref.current.offsetLeft);
+      setScrollLeft(ref.current.scrollLeft);
+      ref.current.style.cursor = 'grabbing';
+      ref.current.style.userSelect = 'none';
+    };
+
+    const handleMouseMove = (e: React.MouseEvent) => {
+      if (!isDragging || !ref.current) return;
+      e.preventDefault();
+      const x = e.pageX - ref.current.offsetLeft;
+      const walk = (x - startX) * 2; // Multiply for faster scroll
+      ref.current.scrollLeft = scrollLeft - walk;
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+      if (ref.current) {
+        ref.current.style.cursor = 'grab';
+        ref.current.style.userSelect = 'auto';
+      }
+    };
+
+    const handleMouseLeave = () => {
+      if (isDragging) {
+        setIsDragging(false);
+        if (ref.current) {
+          ref.current.style.cursor = 'grab';
+          ref.current.style.userSelect = 'auto';
+        }
+      }
+    };
+
+    return {
+      handleMouseDown,
+      handleMouseMove,
+      handleMouseUp,
+      handleMouseLeave,
+    };
+  };
+
+  const routesDragHandlers = useDragScroll(routesScrollRef);
+  const testimonialsDragHandlers = useDragScroll(testimonialsScrollRef);
 
   // Fetch all routes
   const { data } = useQuery({
@@ -81,29 +137,42 @@ export default function LandingPage() {
       <section className="relative min-h-screen flex items-center overflow-hidden">
         {/* Diagonal Background Split */}
         <div className="absolute inset-0">
-          {/* Left side - Image with diagonal cut */}
-          <div
-            className="absolute inset-0"
-            style={{
-              clipPath: "polygon(0 0, 65% 0, 55% 100%, 0 100%)",
-            }}
-          >
+          {/* Mobile: Simple full-width background */}
+          <div className="lg:hidden absolute inset-0">
             <img
               src="/src/assets/Cebu-island.jpg"
               alt="Cebu Island"
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-br from-[#272343]/90 via-[#272343]/70 to-transparent"></div>
+            <div className="absolute inset-0 bg-gradient-to-b from-[#272343]/95 via-[#272343]/85 to-[#272343]/90"></div>
           </div>
 
-          {/* Right side - Solid color */}
-          <div
-            className="absolute inset-0"
-            style={{
-              clipPath: "polygon(65% 0, 100% 0, 100% 100%, 55% 100%)",
-              background: "linear-gradient(135deg, #e3f6f5 0%, #bae8e8 100%)",
-            }}
-          ></div>
+          {/* Desktop: Diagonal split design */}
+          <div className="hidden lg:block absolute inset-0">
+            {/* Left side - Image with diagonal cut */}
+            <div
+              className="absolute inset-0"
+              style={{
+                clipPath: "polygon(0 0, 65% 0, 55% 100%, 0 100%)",
+              }}
+            >
+              <img
+                src="/src/assets/Cebu-island.jpg"
+                alt="Cebu Island"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-br from-[#272343]/90 via-[#272343]/70 to-transparent"></div>
+            </div>
+
+            {/* Right side - Solid color */}
+            <div
+              className="absolute inset-0"
+              style={{
+                clipPath: "polygon(65% 0, 100% 0, 100% 100%, 55% 100%)",
+                background: "linear-gradient(135deg, #e3f6f5 0%, #bae8e8 100%)",
+              }}
+            ></div>
+          </div>
         </div>
 
         <div className="relative w-full px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 py-20 sm:py-24 md:py-32">
@@ -803,16 +872,170 @@ export default function LandingPage() {
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                {filteredRoutes.map((route, index) => (
+              <>
+                {/* Desktop: Grid Layout */}
+                <div className="hidden md:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                  {filteredRoutes.map((route, index) => (
+                    <div
+                      key={route.id}
+                      className="group relative bg-white rounded-3xl overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl"
+                      style={{
+                        border: "2px solid #e3f6f5",
+                        animationDelay: `${index * 100}ms`,
+                      }}
+                    >
+                      {/* Vessel Image with overlay gradient */}
+                      <div className="relative h-56 overflow-hidden">
+                        {route.vessel?.image ||
+                        getVesselImage(route.vessel?.name) ? (
+                          <img
+                            src={
+                              route.vessel?.image ||
+                              getVesselImage(route.vessel?.name) ||
+                              ""
+                            }
+                            alt={route.vessel?.name || "Ferry"}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                          />
+                        ) : (
+                          <div
+                            className="flex items-center justify-center h-full"
+                            style={{ background: "#e3f6f5" }}
+                          >
+                            <Ship
+                              className="w-20 h-20"
+                              style={{ color: "#272343", opacity: 0.2 }}
+                            />
+                          </div>
+                        )}
+                        {/* Gradient overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+
+                        {/* Price tag - unique position */}
+                        <div
+                          className="absolute top-4 right-4 px-5 py-3 rounded-2xl backdrop-blur-md shadow-lg"
+                          style={{ background: "rgba(255, 255, 255, 0.95)" }}
+                        >
+                          <div className="text-2xl font-bold text-[#272343]">
+                            ${route.price}
+                          </div>
+                          <div className="text-xs text-[#5d576b] font-medium">
+                            per person
+                          </div>
+                        </div>
+
+                        {/* Vessel name at bottom of image */}
+                        <div className="absolute bottom-4 left-4 flex items-center gap-2">
+                          <div
+                            className="w-10 h-10 rounded-xl flex items-center justify-center backdrop-blur-md"
+                            style={{ background: "rgba(186, 232, 232, 0.9)" }}
+                          >
+                            <Ship className="w-5 h-5 text-[#272343]" />
+                          </div>
+                          <span className="text-white font-medium text-lg">
+                            {route.vessel?.name || "Ferry"}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Route Details */}
+                      <div className="p-6">
+                        {/* Route Path - Creative Design */}
+                        <div className="mb-6">
+                          <div className="flex items-center gap-3">
+                            <div className="flex-1">
+                              <div className="text-xs text-[#5d576b] mb-1 uppercase tracking-wide font-medium">
+                                From
+                              </div>
+                              <div className="text-lg font-medium text-[#272343] truncate">
+                                {route.origin}
+                              </div>
+                            </div>
+
+                            <div
+                              className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 group-hover:rotate-90 transition-transform duration-500"
+                              style={{ background: "#e3f6f5" }}
+                            >
+                              <ArrowRight className="w-5 h-5 text-[#272343]" />
+                            </div>
+
+                            <div className="flex-1 text-right">
+                              <div className="text-xs text-[#5d576b] mb-1 uppercase tracking-wide font-medium">
+                                To
+                              </div>
+                              <div className="text-lg font-medium text-[#272343] truncate">
+                                {route.destination}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Info pills */}
+                        <div className="flex flex-wrap gap-2 mb-6">
+                          <div
+                            className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm"
+                            style={{ background: "#e3f6f5", color: "#272343" }}
+                          >
+                            <Clock className="w-4 h-4" />
+                            <span>{route.duration} min</span>
+                          </div>
+                          {route.vessel?.capacity && (
+                            <div
+                              className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm"
+                              style={{ background: "#e3f6f5", color: "#272343" }}
+                            >
+                              <Users className="w-4 h-4" />
+                              <span>{route.vessel.capacity} seats</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Book Button - Unique Design */}
+                        <button
+                          onClick={() => handleBookRoute(route)}
+                          className="group/btn relative w-full py-4 text-white rounded-2xl font-medium transition-all duration-300 overflow-hidden"
+                          style={{
+                            background: "#272343",
+                            fontSize: "15px",
+                          }}
+                        >
+                          <span className="relative z-10 flex items-center justify-center gap-2">
+                            Book This Route
+                            <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
+                          </span>
+                          {/* Animated background */}
+                          <div className="absolute inset-0 bg-[#bae8e8] transform -translate-x-full group-hover/btn:translate-x-0 transition-transform duration-300"></div>
+                          <span className="absolute inset-0 z-10 flex items-center justify-center gap-2 text-[#272343] opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300">
+                            Book This Route
+                            <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Mobile: Horizontal Scroll */}
+                <div className="md:hidden relative">
                   <div
-                    key={route.id}
-                    className="group relative bg-white rounded-3xl overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl"
-                    style={{
-                      border: "2px solid #e3f6f5",
-                      animationDelay: `${index * 100}ms`,
-                    }}
+                    ref={routesScrollRef}
+                    className="overflow-x-auto pb-6 -mx-4 px-4 snap-x snap-mandatory hide-scrollbar"
+                    style={{ cursor: 'grab' }}
+                    onMouseDown={routesDragHandlers.handleMouseDown}
+                    onMouseMove={routesDragHandlers.handleMouseMove}
+                    onMouseUp={routesDragHandlers.handleMouseUp}
+                    onMouseLeave={routesDragHandlers.handleMouseLeave}
                   >
+                    <div className="flex gap-6" style={{ width: "max-content" }}>
+                      {filteredRoutes.map((route) => (
+                        <div
+                          key={route.id}
+                          className="snap-center relative bg-white rounded-3xl overflow-hidden shadow-lg flex-shrink-0"
+                          style={{
+                            border: "2px solid #e3f6f5",
+                            width: "320px",
+                          }}
+                        >
                     {/* Vessel Image with overlay gradient */}
                     <div className="relative h-56 overflow-hidden">
                       {route.vessel?.image ||
@@ -940,9 +1163,19 @@ export default function LandingPage() {
                         </span>
                       </button>
                     </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                ))}
-              </div>
+
+                  {/* Scroll Indicator for Mobile */}
+                  <div className="text-center mt-4">
+                    <p className="text-sm font-light" style={{ color: "#5d576b" }}>
+                      ← Swipe or drag to explore more routes →
+                    </p>
+                  </div>
+                </div>
+              </>
             )}
           </div>
         </div>
@@ -977,80 +1210,180 @@ export default function LandingPage() {
         </div>
 
         {/* Testimonial Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-20">
-          {[
-            {
-              quote:
-                "Voyager completely transformed how I book ferry tickets. The instant confirmation and mobile boarding pass made my island hopping stress-free!",
-              author: "Sarah Johnson",
-              role: "Travel Blogger",
-              rating: 5,
-            },
-            {
-              quote:
-                "As a business traveler, I need reliability. Voyager delivers every time with on-time departures and seamless booking experience.",
-              author: "Michael Chen",
-              role: "Consultant",
-              rating: 5,
-            },
-            {
-              quote:
-                "The customer support team went above and beyond to help me reschedule my booking. Truly exceptional service that I recommend to everyone!",
-              author: "Emma Williams",
-              role: "Tourist",
-              rating: 5,
-            },
-          ].map((testimonial, index) => (
-            <div
-              key={index}
-              className="group bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 relative overflow-hidden"
-            >
-              {/* Decorative quote mark */}
+        <div className="max-w-7xl mx-auto mb-20">
+          {/* Desktop: Grid Layout */}
+          <div className="hidden md:grid grid-cols-1 md:grid-cols-3 gap-6 px-4 sm:px-6 lg:px-8">
+            {[
+              {
+                quote:
+                  "Voyager completely transformed how I book ferry tickets. The instant confirmation and mobile boarding pass made my island hopping stress-free!",
+                author: "Sarah Johnson",
+                role: "Travel Blogger",
+                rating: 5,
+              },
+              {
+                quote:
+                  "As a business traveler, I need reliability. Voyager delivers every time with on-time departures and seamless booking experience.",
+                author: "Michael Chen",
+                role: "Consultant",
+                rating: 5,
+              },
+              {
+                quote:
+                  "The customer support team went above and beyond to help me reschedule my booking. Truly exceptional service that I recommend to everyone!",
+                author: "Emma Williams",
+                role: "Tourist",
+                rating: 5,
+              },
+            ].map((testimonial, index) => (
               <div
-                className="absolute -top-4 -right-4 text-9xl font-serif opacity-5 group-hover:opacity-10 transition-opacity"
-                style={{ color: "#272343" }}
+                key={index}
+                className="group bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 relative overflow-hidden"
               >
-                "
-              </div>
+                {/* Decorative quote mark */}
+                <div
+                  className="absolute -top-4 -right-4 text-9xl font-serif opacity-5 group-hover:opacity-10 transition-opacity"
+                  style={{ color: "#272343" }}
+                >
+                  "
+                </div>
 
-              {/* Stars */}
-              <div className="flex gap-1 mb-4">
-                {[...Array(testimonial.rating)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className="w-5 h-5 fill-[#272343] text-[#272343]"
-                  />
+                {/* Stars */}
+                <div className="flex gap-1 mb-4">
+                  {[...Array(testimonial.rating)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className="w-5 h-5 fill-[#272343] text-[#272343]"
+                    />
+                  ))}
+                </div>
+
+                <p
+                  className="text-lg mb-6 leading-relaxed font-light relative z-10"
+                  style={{ color: "#3d3851" }}
+                >
+                  "{testimonial.quote}"
+                </p>
+
+                <div className="flex items-center gap-4">
+                  <div
+                    className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-white"
+                    style={{ background: "#272343" }}
+                  >
+                    {testimonial.author.charAt(0)}
+                  </div>
+                  <div>
+                    <div className="font-medium" style={{ color: "#272343" }}>
+                      {testimonial.author}
+                    </div>
+                    <div
+                      className="text-sm font-light"
+                      style={{ color: "#5d576b" }}
+                    >
+                      {testimonial.role}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Mobile: Horizontal Scroll */}
+          <div className="md:hidden">
+            <div
+              ref={testimonialsScrollRef}
+              className="overflow-x-auto pb-6 -mx-4 px-4 snap-x snap-mandatory hide-scrollbar"
+              style={{ cursor: 'grab' }}
+              onMouseDown={testimonialsDragHandlers.handleMouseDown}
+              onMouseMove={testimonialsDragHandlers.handleMouseMove}
+              onMouseUp={testimonialsDragHandlers.handleMouseUp}
+              onMouseLeave={testimonialsDragHandlers.handleMouseLeave}
+            >
+              <div className="flex gap-6" style={{ width: "max-content" }}>
+                {[
+                  {
+                    quote:
+                      "Voyager completely transformed how I book ferry tickets. The instant confirmation and mobile boarding pass made my island hopping stress-free!",
+                    author: "Sarah Johnson",
+                    role: "Travel Blogger",
+                    rating: 5,
+                  },
+                  {
+                    quote:
+                      "As a business traveler, I need reliability. Voyager delivers every time with on-time departures and seamless booking experience.",
+                    author: "Michael Chen",
+                    role: "Consultant",
+                    rating: 5,
+                  },
+                  {
+                    quote:
+                      "The customer support team went above and beyond to help me reschedule my booking. Truly exceptional service that I recommend to everyone!",
+                    author: "Emma Williams",
+                    role: "Tourist",
+                    rating: 5,
+                  },
+                ].map((testimonial, index) => (
+                  <div
+                    key={index}
+                    className="snap-center bg-white rounded-3xl p-8 shadow-lg relative overflow-hidden flex-shrink-0"
+                    style={{ width: "320px" }}
+                  >
+                    {/* Decorative quote mark */}
+                    <div
+                      className="absolute -top-4 -right-4 text-9xl font-serif opacity-5"
+                      style={{ color: "#272343" }}
+                    >
+                      "
+                    </div>
+
+                    {/* Stars */}
+                    <div className="flex gap-1 mb-4">
+                      {[...Array(testimonial.rating)].map((_, i) => (
+                        <Star
+                          key={i}
+                          className="w-5 h-5 fill-[#272343] text-[#272343]"
+                        />
+                      ))}
+                    </div>
+
+                    <p
+                      className="text-base mb-6 leading-relaxed font-light relative z-10"
+                      style={{ color: "#3d3851" }}
+                    >
+                      "{testimonial.quote}"
+                    </p>
+
+                    <div className="flex items-center gap-4">
+                      <div
+                        className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-white"
+                        style={{ background: "#272343" }}
+                      >
+                        {testimonial.author.charAt(0)}
+                      </div>
+                      <div>
+                        <div className="font-medium" style={{ color: "#272343" }}>
+                          {testimonial.author}
+                        </div>
+                        <div
+                          className="text-sm font-light"
+                          style={{ color: "#5d576b" }}
+                        >
+                          {testimonial.role}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 ))}
               </div>
-
-              <p
-                className="text-lg mb-6 leading-relaxed font-light relative z-10"
-                style={{ color: "#3d3851" }}
-              >
-                "{testimonial.quote}"
-              </p>
-
-              <div className="flex items-center gap-4">
-                <div
-                  className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-white"
-                  style={{ background: "#272343" }}
-                >
-                  {testimonial.author.charAt(0)}
-                </div>
-                <div>
-                  <div className="font-medium" style={{ color: "#272343" }}>
-                    {testimonial.author}
-                  </div>
-                  <div
-                    className="text-sm font-light"
-                    style={{ color: "#5d576b" }}
-                  >
-                    {testimonial.role}
-                  </div>
-                </div>
-              </div>
             </div>
-          ))}
+
+            {/* Scroll Indicator for Mobile */}
+            <div className="text-center mt-4 px-4">
+              <p className="text-sm font-light" style={{ color: "#5d576b" }}>
+                ← Swipe or drag to read more testimonials →
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* CTA Section - Unique Split Design */}
@@ -1362,6 +1695,39 @@ export default function LandingPage() {
         .delay-500 {
           animation-delay: 0.5s;
           animation-fill-mode: both;
+        }
+
+        /* Hide scrollbar for horizontal scroll sections */
+        .hide-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+          -webkit-overflow-scrolling: touch;
+          scroll-behavior: smooth;
+        }
+
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+
+        /* Smooth scroll snap */
+        .snap-x {
+          scroll-snap-type: x mandatory;
+        }
+
+        .snap-center {
+          scroll-snap-align: center;
+        }
+
+        .snap-start {
+          scroll-snap-align: start;
+        }
+
+        /* Mobile responsive improvements */
+        @media (max-width: 768px) {
+          .overflow-x-auto {
+            overflow-x: scroll;
+            overflow-y: hidden;
+          }
         }
       `}</style>
     </div>
