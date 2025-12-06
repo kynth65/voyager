@@ -51,8 +51,8 @@ export default function LandingPage() {
       setIsDragging(true);
       setStartX(e.pageX - ref.current.offsetLeft);
       setScrollLeft(ref.current.scrollLeft);
-      ref.current.style.cursor = 'grabbing';
-      ref.current.style.userSelect = 'none';
+      ref.current.style.cursor = "grabbing";
+      ref.current.style.userSelect = "none";
     };
 
     const handleMouseMove = (e: React.MouseEvent) => {
@@ -66,8 +66,8 @@ export default function LandingPage() {
     const handleMouseUp = () => {
       setIsDragging(false);
       if (ref.current) {
-        ref.current.style.cursor = 'grab';
-        ref.current.style.userSelect = 'auto';
+        ref.current.style.cursor = "grab";
+        ref.current.style.userSelect = "auto";
       }
     };
 
@@ -75,8 +75,8 @@ export default function LandingPage() {
       if (isDragging) {
         setIsDragging(false);
         if (ref.current) {
-          ref.current.style.cursor = 'grab';
-          ref.current.style.userSelect = 'auto';
+          ref.current.style.cursor = "grab";
+          ref.current.style.userSelect = "auto";
         }
       }
     };
@@ -982,7 +982,10 @@ export default function LandingPage() {
                           {route.vessel?.capacity && (
                             <div
                               className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm"
-                              style={{ background: "#e3f6f5", color: "#272343" }}
+                              style={{
+                                background: "#e3f6f5",
+                                color: "#272343",
+                              }}
                             >
                               <Users className="w-4 h-4" />
                               <span>{route.vessel.capacity} seats</span>
@@ -1020,13 +1023,16 @@ export default function LandingPage() {
                   <div
                     ref={routesScrollRef}
                     className="overflow-x-auto pb-6 -mx-4 px-4 snap-x snap-mandatory hide-scrollbar"
-                    style={{ cursor: 'grab' }}
+                    style={{ cursor: "grab" }}
                     onMouseDown={routesDragHandlers.handleMouseDown}
                     onMouseMove={routesDragHandlers.handleMouseMove}
                     onMouseUp={routesDragHandlers.handleMouseUp}
                     onMouseLeave={routesDragHandlers.handleMouseLeave}
                   >
-                    <div className="flex gap-6" style={{ width: "max-content" }}>
+                    <div
+                      className="flex gap-6"
+                      style={{ width: "max-content" }}
+                    >
                       {filteredRoutes.map((route) => (
                         <div
                           key={route.id}
@@ -1036,133 +1042,143 @@ export default function LandingPage() {
                             width: "320px",
                           }}
                         >
-                    {/* Vessel Image with overlay gradient */}
-                    <div className="relative h-56 overflow-hidden">
-                      {route.vessel?.image ||
-                      getVesselImage(route.vessel?.name) ? (
-                        <img
-                          src={
-                            route.vessel?.image ||
-                            getVesselImage(route.vessel?.name) ||
-                            ""
-                          }
-                          alt={route.vessel?.name || "Ferry"}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                        />
-                      ) : (
-                        <div
-                          className="flex items-center justify-center h-full"
-                          style={{ background: "#e3f6f5" }}
-                        >
-                          <Ship
-                            className="w-20 h-20"
-                            style={{ color: "#272343", opacity: 0.2 }}
-                          />
-                        </div>
-                      )}
-                      {/* Gradient overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                          {/* Vessel Image with overlay gradient */}
+                          <div className="relative h-56 overflow-hidden">
+                            {route.vessel?.image ||
+                            getVesselImage(route.vessel?.name) ? (
+                              <img
+                                src={
+                                  route.vessel?.image ||
+                                  getVesselImage(route.vessel?.name) ||
+                                  ""
+                                }
+                                alt={route.vessel?.name || "Ferry"}
+                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                              />
+                            ) : (
+                              <div
+                                className="flex items-center justify-center h-full"
+                                style={{ background: "#e3f6f5" }}
+                              >
+                                <Ship
+                                  className="w-20 h-20"
+                                  style={{ color: "#272343", opacity: 0.2 }}
+                                />
+                              </div>
+                            )}
+                            {/* Gradient overlay */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
 
-                      {/* Price tag - unique position */}
-                      <div
-                        className="absolute top-4 right-4 px-5 py-3 rounded-2xl backdrop-blur-md shadow-lg"
-                        style={{ background: "rgba(255, 255, 255, 0.95)" }}
-                      >
-                        <div className="text-2xl font-bold text-[#272343]">
-                          ${route.price}
-                        </div>
-                        <div className="text-xs text-[#5d576b] font-medium">
-                          per person
-                        </div>
-                      </div>
-
-                      {/* Vessel name at bottom of image */}
-                      <div className="absolute bottom-4 left-4 flex items-center gap-2">
-                        <div
-                          className="w-10 h-10 rounded-xl flex items-center justify-center backdrop-blur-md"
-                          style={{ background: "rgba(186, 232, 232, 0.9)" }}
-                        >
-                          <Ship className="w-5 h-5 text-[#272343]" />
-                        </div>
-                        <span className="text-white font-medium text-lg">
-                          {route.vessel?.name || "Ferry"}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Route Details */}
-                    <div className="p-6">
-                      {/* Route Path - Creative Design */}
-                      <div className="mb-6">
-                        <div className="flex items-center gap-3">
-                          <div className="flex-1">
-                            <div className="text-xs text-[#5d576b] mb-1 uppercase tracking-wide font-medium">
-                              From
+                            {/* Price tag - unique position */}
+                            <div
+                              className="absolute top-4 right-4 px-5 py-3 rounded-2xl backdrop-blur-md shadow-lg"
+                              style={{
+                                background: "rgba(255, 255, 255, 0.95)",
+                              }}
+                            >
+                              <div className="text-2xl font-bold text-[#272343]">
+                                ${route.price}
+                              </div>
+                              <div className="text-xs text-[#5d576b] font-medium">
+                                per person
+                              </div>
                             </div>
-                            <div className="text-lg font-medium text-[#272343] truncate">
-                              {route.origin}
+
+                            {/* Vessel name at bottom of image */}
+                            <div className="absolute bottom-4 left-4 flex items-center gap-2">
+                              <div
+                                className="w-10 h-10 rounded-xl flex items-center justify-center backdrop-blur-md"
+                                style={{
+                                  background: "rgba(186, 232, 232, 0.9)",
+                                }}
+                              >
+                                <Ship className="w-5 h-5 text-[#272343]" />
+                              </div>
+                              <span className="text-white font-medium text-lg">
+                                {route.vessel?.name || "Ferry"}
+                              </span>
                             </div>
                           </div>
 
-                          <div
-                            className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 group-hover:rotate-90 transition-transform duration-500"
-                            style={{ background: "#e3f6f5" }}
-                          >
-                            <ArrowRight className="w-5 h-5 text-[#272343]" />
-                          </div>
+                          {/* Route Details */}
+                          <div className="p-6">
+                            {/* Route Path - Creative Design */}
+                            <div className="mb-6">
+                              <div className="flex items-center gap-3">
+                                <div className="flex-1">
+                                  <div className="text-xs text-[#5d576b] mb-1 uppercase tracking-wide font-medium">
+                                    From
+                                  </div>
+                                  <div className="text-lg font-medium text-[#272343] truncate">
+                                    {route.origin}
+                                  </div>
+                                </div>
 
-                          <div className="flex-1 text-right">
-                            <div className="text-xs text-[#5d576b] mb-1 uppercase tracking-wide font-medium">
-                              To
+                                <div
+                                  className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 group-hover:rotate-90 transition-transform duration-500"
+                                  style={{ background: "#e3f6f5" }}
+                                >
+                                  <ArrowRight className="w-5 h-5 text-[#272343]" />
+                                </div>
+
+                                <div className="flex-1 text-right">
+                                  <div className="text-xs text-[#5d576b] mb-1 uppercase tracking-wide font-medium">
+                                    To
+                                  </div>
+                                  <div className="text-lg font-medium text-[#272343] truncate">
+                                    {route.destination}
+                                  </div>
+                                </div>
+                              </div>
                             </div>
-                            <div className="text-lg font-medium text-[#272343] truncate">
-                              {route.destination}
+
+                            {/* Info pills */}
+                            <div className="flex flex-wrap gap-2 mb-6">
+                              <div
+                                className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm"
+                                style={{
+                                  background: "#e3f6f5",
+                                  color: "#272343",
+                                }}
+                              >
+                                <Clock className="w-4 h-4" />
+                                <span>{route.duration} min</span>
+                              </div>
+                              {route.vessel?.capacity && (
+                                <div
+                                  className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm"
+                                  style={{
+                                    background: "#e3f6f5",
+                                    color: "#272343",
+                                  }}
+                                >
+                                  <Users className="w-4 h-4" />
+                                  <span>{route.vessel.capacity} seats</span>
+                                </div>
+                              )}
                             </div>
-                          </div>
-                        </div>
-                      </div>
 
-                      {/* Info pills */}
-                      <div className="flex flex-wrap gap-2 mb-6">
-                        <div
-                          className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm"
-                          style={{ background: "#e3f6f5", color: "#272343" }}
-                        >
-                          <Clock className="w-4 h-4" />
-                          <span>{route.duration} min</span>
-                        </div>
-                        {route.vessel?.capacity && (
-                          <div
-                            className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm"
-                            style={{ background: "#e3f6f5", color: "#272343" }}
-                          >
-                            <Users className="w-4 h-4" />
-                            <span>{route.vessel.capacity} seats</span>
+                            {/* Book Button - Unique Design */}
+                            <button
+                              onClick={() => handleBookRoute(route)}
+                              className="group/btn relative w-full py-4 text-white rounded-2xl font-medium transition-all duration-300 overflow-hidden"
+                              style={{
+                                background: "#272343",
+                                fontSize: "15px",
+                              }}
+                            >
+                              <span className="relative z-10 flex items-center justify-center gap-2">
+                                Book This Route
+                                <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
+                              </span>
+                              {/* Animated background */}
+                              <div className="absolute inset-0 bg-[#bae8e8] transform -translate-x-full group-hover/btn:translate-x-0 transition-transform duration-300"></div>
+                              <span className="absolute inset-0 z-10 flex items-center justify-center gap-2 text-[#272343] opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300">
+                                Book This Route
+                                <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
+                              </span>
+                            </button>
                           </div>
-                        )}
-                      </div>
-
-                      {/* Book Button - Unique Design */}
-                      <button
-                        onClick={() => handleBookRoute(route)}
-                        className="group/btn relative w-full py-4 text-white rounded-2xl font-medium transition-all duration-300 overflow-hidden"
-                        style={{
-                          background: "#272343",
-                          fontSize: "15px",
-                        }}
-                      >
-                        <span className="relative z-10 flex items-center justify-center gap-2">
-                          Book This Route
-                          <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
-                        </span>
-                        {/* Animated background */}
-                        <div className="absolute inset-0 bg-[#bae8e8] transform -translate-x-full group-hover/btn:translate-x-0 transition-transform duration-300"></div>
-                        <span className="absolute inset-0 z-10 flex items-center justify-center gap-2 text-[#272343] opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300">
-                          Book This Route
-                          <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
-                        </span>
-                      </button>
-                    </div>
                         </div>
                       ))}
                     </div>
@@ -1170,7 +1186,10 @@ export default function LandingPage() {
 
                   {/* Scroll Indicator for Mobile */}
                   <div className="text-center mt-4">
-                    <p className="text-sm font-light" style={{ color: "#5d576b" }}>
+                    <p
+                      className="text-sm font-light"
+                      style={{ color: "#5d576b" }}
+                    >
                       ← Swipe or drag to explore more routes →
                     </p>
                   </div>
@@ -1293,7 +1312,7 @@ export default function LandingPage() {
             <div
               ref={testimonialsScrollRef}
               className="overflow-x-auto pb-6 -mx-4 px-4 snap-x snap-mandatory hide-scrollbar"
-              style={{ cursor: 'grab' }}
+              style={{ cursor: "grab" }}
               onMouseDown={testimonialsDragHandlers.handleMouseDown}
               onMouseMove={testimonialsDragHandlers.handleMouseMove}
               onMouseUp={testimonialsDragHandlers.handleMouseUp}
@@ -1361,7 +1380,10 @@ export default function LandingPage() {
                         {testimonial.author.charAt(0)}
                       </div>
                       <div>
-                        <div className="font-medium" style={{ color: "#272343" }}>
+                        <div
+                          className="font-medium"
+                          style={{ color: "#272343" }}
+                        >
                           {testimonial.author}
                         </div>
                         <div
