@@ -6,3 +6,4 @@ CLAUDE.md
 Voyager - project implementation.md
 *.md
 !README.md
+.playwright-mcp
