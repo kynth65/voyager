@@ -28,6 +28,8 @@ import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 import ReportsPage from './pages/admin/ReportsPage';
 // Customer pages
 import LandingPage from './pages/LandingPage';
+import AboutPage from './pages/AboutPage';
+import FerryRoutesPage from './pages/FerryRoutesPage';
 import BrowseRoutesPage from './pages/customer/BrowseRoutesPage';
 import BookingPage from './pages/customer/BookingPage';
 import BookingConfirmationPage from './pages/customer/BookingConfirmationPage';
@@ -139,6 +141,12 @@ function AppRoutes() {
           </PublicRoute>
         }
       />
+
+      {/* About page - public route */}
+      <Route path="/about" element={<AboutPage />} />
+
+      {/* Routes page - public route */}
+      <Route path="/routes" element={<FerryRoutesPage />} />
 
       {/* Auth routes */}
       <Route
