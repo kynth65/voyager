@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { Ship } from "lucide-react";
 
 interface NavbarProps {
@@ -12,6 +12,7 @@ export default function Navbar({
   showAuthButtons = true,
 }: NavbarProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
 
   // Handle scroll effect for navbar
@@ -26,6 +27,29 @@ export default function Navbar({
   // Determine navbar styles based on scroll state and transparent prop
   const shouldBeTransparent = transparent && !isScrolled;
 
+  // Handle logo click - navigate to home and scroll to top
+  const handleLogoClick = () => {
+    navigate("/");
+    window.scrollTo(0, 0);
+  };
+
+  // Handle FAQ click - navigate to home and scroll to how-it-works section
+  const handleFAQClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (location.pathname === "/") {
+      // Already on home, just scroll
+      const section = document.getElementById("how-it-works");
+      section?.scrollIntoView({ behavior: "smooth" });
+    } else {
+      // Navigate to home first, then scroll after a brief delay
+      navigate("/");
+      setTimeout(() => {
+        const section = document.getElementById("how-it-works");
+        section?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    }
+  };
+
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -36,7 +60,7 @@ export default function Navbar({
         <div className="flex justify-between items-center">
           <div
             className="flex items-center gap-3 group cursor-pointer"
-            onClick={() => navigate("/")}
+            onClick={handleLogoClick}
           >
             <div
               className={`p-2 rounded-xl transition-colors`}
@@ -60,6 +84,38 @@ export default function Navbar({
               Voyager
             </span>
           </div>
+
+          {/* Navigation Links */}
+          <div className="hidden md:flex items-center gap-8">
+            <Link
+              to="/routes"
+              className="font-medium transition-all duration-200 hover:scale-105"
+              style={{
+                color: shouldBeTransparent ? "#ffffff" : "#272343",
+              }}
+            >
+              Routes
+            </Link>
+            <Link
+              to="/about"
+              className="font-medium transition-all duration-200 hover:scale-105"
+              style={{
+                color: shouldBeTransparent ? "#ffffff" : "#272343",
+              }}
+            >
+              About
+            </Link>
+            <button
+              onClick={handleFAQClick}
+              className="font-medium transition-all duration-200 hover:scale-105"
+              style={{
+                color: shouldBeTransparent ? "#ffffff" : "#272343",
+              }}
+            >
+              FAQ
+            </button>
+          </div>
+
           {showAuthButtons && (
             <div className="flex items-center gap-3">
               <button
